@@ -1,0 +1,15 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "hardhat": "^2.19.4"
+  },
+  "dependencies": {
+    "@balancer-labs/v2-interfaces": "^0.4.0",
+    "@balancer-labs/v2-solidity-utils": "^4.0.0",
+    "@balancer-labs/v2-vault": "^3.0.1",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "ethers": "^6.9.1",
+    "hardhat-local-networks-config-plugin": "^0.0.6"
+  }
+}
