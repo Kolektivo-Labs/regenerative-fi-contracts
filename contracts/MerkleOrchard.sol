@@ -37,6 +37,7 @@ contract MerkleOrchard {
     mapping(bytes32 => mapping(address => mapping(uint256 => uint256))) private _claimedBitmap;
     // channelId > balance
     mapping(bytes32 => uint256) private _remainingBalance;
+    bool private isClaimable = false;
 
     event DistributionAdded(
         address indexed distributor,
@@ -196,6 +197,16 @@ contract MerkleOrchard {
         emit DistributionAdded(distributor, token, distributionId, merkleRoot, amount);
     }
 
+    // // TODO: protect
+    // function pauseClaiming() {
+    //     isClaimable = false;
+    // }
+
+    // // TODO: protect
+    // function unpauseClaiming() {
+    //     isClaimable = true;
+    // }
+
     // Helper functions
 
     function _getChannelId(IERC20 token, address distributor) private pure returns (bytes32) {
@@ -209,6 +220,7 @@ contract MerkleOrchard {
         IERC20[] memory tokens,
         bool asInternalBalance
     ) internal {
+        require(isClaimable, "Is not claimable");
         uint256[] memory amounts = new uint256[](tokens.length);
         Claim memory claim;
 

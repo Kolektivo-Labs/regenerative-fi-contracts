@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-ethers");
+require("hardhat-deploy");
+require("hardhat-deploy-ethers");
 require("hardhat-local-networks-config-plugin");
 
 require("./tasks");
@@ -10,13 +12,26 @@ module.exports = {
     timeout: 600000,
   },
   solidity: {
-    version: "0.7.1",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 9999,
+    compilers: [
+      {
+        version: "0.7.1",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 9999,
+          },
+        },
       },
-    },
+      {
+        version: "0.8.19",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 9999,
+          },
+        },
+      },
+    ],
   },
   vyper: {
     compilers: [{ version: "0.3.1" }, { version: "0.3.3" }],
