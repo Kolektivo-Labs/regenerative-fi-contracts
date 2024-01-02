@@ -16,6 +16,7 @@ pragma experimental ABIEncoderV2;
 
 import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/MerkleProof.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/SafeERC20.sol";
+import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/Ownable.sol";
 
 import "@balancer-labs/v2-interfaces/contracts/solidity-utils/openzeppelin/IERC20.sol";
 import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
@@ -25,12 +26,13 @@ import "./interfaces/IDistributorCallback.sol";
 
 pragma solidity ^0.7.0;
 
-contract MerkleOrchard {
+contract ReFiMerkleOrchard is Ownable {
     using SafeERC20 for IERC20;
+    
 
     // Recorded distributions
     // channelId > distributionId
-    mapping(bytes32 => uint256) private _nextDistributionId;
+    mapping(bytes32 => uint256) public nextDistributionId;
     // channelId > distributionId > root
     mapping(bytes32 => mapping(uint256 => bytes32)) private _distributionRoot;
     // channelId > claimer > distributionId / 256 (word index) -> bitmap
@@ -56,9 +58,14 @@ contract MerkleOrchard {
     );
 
     IVault private immutable _vault;
+    IERC20 private immutable _rfp;
+    bytes32 private immutable _rfpChannelId;
 
-    constructor(IVault vault) {
+
+    constructor(IVault vault, IERC20 reFiPoints) {
         _vault = vault;
+        _rfpChannelId = _getChannelId(reFiPoints, address(this));
+        _rfp = reFiPoints;
     }
 
     struct Claim {
@@ -93,7 +100,7 @@ contract MerkleOrchard {
      */
     function getNextDistributionId(IERC20 token, address distributor) external view returns (uint256) {
         bytes32 channelId = _getChannelId(token, distributor);
-        return _nextDistributionId[channelId];
+        return nextDistributionId[channelId];
     }
 
     function isClaimed(
@@ -173,7 +180,7 @@ contract MerkleOrchard {
 
         bytes32 channelId = _getChannelId(token, distributor);
         require(
-            _nextDistributionId[channelId] == distributionId || _nextDistributionId[channelId] == 0,
+            nextDistributionId[channelId] == distributionId || nextDistributionId[channelId] == 0,
             "invalid distribution ID"
         );
         token.safeTransferFrom(distributor, address(this), amount);
@@ -193,9 +200,25 @@ contract MerkleOrchard {
 
         _remainingBalance[channelId] += amount;
         _distributionRoot[channelId][distributionId] = merkleRoot;
-        _nextDistributionId[channelId] = distributionId + 1;
+        nextDistributionId[channelId] = distributionId + 1;
         emit DistributionAdded(distributor, token, distributionId, merkleRoot, amount);
     }
+
+    /**
+     * @notice Allows a distributor to add funds to the contract as a merkle tree.
+     */
+    function createRfpDistribution(
+        bytes32 merkleRoot,
+        uint256 amount
+    ) external onlyOwner {
+        //TODO: require isPaused
+        uint256 thisDistributionId = nextDistributionId[_rfpChannelId];
+        _distributionRoot[_rfpChannelId][thisDistributionId] = merkleRoot;
+        nextDistributionId[_rfpChannelId] = thisDistributionId + 1;
+        emit DistributionAdded(address(this), _rfp, thisDistributionId, merkleRoot, amount);
+    }
+    
+    
 
     // // TODO: protect
     // function pauseClaiming() {
@@ -220,7 +243,7 @@ contract MerkleOrchard {
         IERC20[] memory tokens,
         bool asInternalBalance
     ) internal {
-        require(isClaimable, "Is not claimable");
+        // require(isClaimable, "Is not claimable");
         uint256[] memory amounts = new uint256[](tokens.length);
         Claim memory claim;
 
