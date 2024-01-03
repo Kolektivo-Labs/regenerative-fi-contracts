@@ -4,9 +4,6 @@ require("hardhat-deploy");
 require("hardhat-deploy-ethers");
 require("hardhat-local-networks-config-plugin");
 
-require("./tasks/merkle");
-require("./tasks/utils");
-require("./tasks/test");
 require("./tasks/simple");
 
 /** @type import('hardhat/config').HardhatUserConfig */
