@@ -6,14 +6,14 @@ task(
   "task:utils:claim-args",
   "Returns and prints call arguments needed for claiming"
 )
-  .addParam("name", "Filename of JSON in ./tree-data")
+  .addParam("name", "Filename of JSON in ./data")
   .addParam("address", "Claimer address")
   .setAction(async ({ name, address }, { ethers }) => {
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();
 
     const merkleOrchard = await ethers.getContract("ReFiMerkleOrchard");
-    const rfp = await ethers.getContract("ReFiPoints");
-    const dataPath = path.join(__dirname, `../tree-data/${name}.json`);
+    const rfp = await ethers.getContract("RFP");
+    const dataPath = path.join(__dirname, `../data/${name}.json`);
     const data = JSON.parse(await fs.readFile(dataPath, "utf-8"));
     const jsTree = new MerkleTree(data.leafs);
     const claim = data.leafs.find((el) => el[0] === address);

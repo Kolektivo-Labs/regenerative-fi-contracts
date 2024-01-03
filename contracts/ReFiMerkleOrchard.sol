@@ -62,10 +62,10 @@ contract ReFiMerkleOrchard is Ownable {
     bytes32 private immutable _rfpChannelId;
 
 
-    constructor(IVault vault, IERC20 reFiPoints) {
+    constructor(IVault vault, IERC20 rfp) {
         _vault = vault;
-        _rfpChannelId = _getChannelId(reFiPoints, address(this));
-        _rfp = reFiPoints;
+        _rfpChannelId = _getChannelId(rfp, address(this));
+        _rfp = rfp;
     }
 
     struct Claim {

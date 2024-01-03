@@ -6,11 +6,11 @@ module.exports = async ({ getNamedAccounts, deployments, ethers }) => {
     from: deployer.address,
     args: [
       "0xcea5C87415A45B238920a34139f5FC88a5eB3B0C",
-      (await get("ReFiPoints")).address,
+      (await get("RFP")).address,
     ],
     log: true,
   });
 };
 
 module.exports.tags = ["MerkleOrchard"];
-module.exports.dependencies = ["ReFiPoints"];
+module.exports.dependencies = ["RFP"];

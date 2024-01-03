@@ -12,7 +12,7 @@ const distr2Name = "test-2";
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
     const [deployer, other1, other2] = await ethers.getSigners();
-    await deployments.fixture(); // ensure you start from a fresh deployments
+    await deployments.fixture(["RFP", "MerkleOrchard"]); // ensure you start from a fresh deployments
     const merkleOrchard = await ethers.getContract(
       "ReFiMerkleOrchard",
       deployer.address
@@ -24,7 +24,7 @@ const setupTest = deployments.createFixture(
   }
 );
 
-describe("ReFiMerkleOrchard contract", function () {
+describe("Merkle distribution flow", function () {
   let merkleOrchard, accounts;
   let tx, jsTree, totalAmount, rfpAddress;
 
@@ -33,7 +33,7 @@ describe("ReFiMerkleOrchard contract", function () {
   });
 
   describe("first epoch", async () => {
-    describe("task:create-distribution", () => {
+    describe("task:merkle:create-alloc", () => {
       context("without owner role", () => {
         it("reverts 'BAL#426 (CALLER_IS_NOT_OWNER)'", async () => {
           await expect(
@@ -46,10 +46,10 @@ describe("ReFiMerkleOrchard contract", function () {
 
       context("with owner role", () => {
         before("run task to create distribution", async () => {
-          ({ tx, jsTree, totalAmount } = await run("task:create-distribution", {
+          ({ tx, jsTree, totalAmount } = await run("task:merkle:create-alloc", {
             name: distr1Name,
           }));
-          rfpAddress = (await ethers.getContract("ReFiPoints")).target;
+          rfpAddress = (await ethers.getContract("RFP")).target;
         });
 
         it("emits the event DistributionAdded with correct parameters", async () => {
@@ -75,7 +75,6 @@ describe("ReFiMerkleOrchard contract", function () {
             address: mockAddress,
           });
           const claim = claimArgs[0];
-          console.log(claim);
           expect(claim.distributionId).to.equal("0");
           expect(claim.balance).to.equal("2000000000000000000000");
           expect(claim.distributor).to.equal(merkleOrchard.target);
@@ -86,9 +85,9 @@ describe("ReFiMerkleOrchard contract", function () {
         });
       });
 
-      // describe("task:claim", () => {
+      // describe("task:merkle:claim", () => {
       //   it("transfers claimable amount to claimer", async () => {
-      //     await run("task:claim", {
+      //     await run("task:merkle:claim", {
       //       name: "test-1",
       //       address: mockAddress,
       //     });

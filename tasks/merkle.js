@@ -2,10 +2,10 @@ const fs = require("fs/promises");
 const path = require("path");
 const MerkleTree = require("../utils/merkleTree");
 
-task("task:verify-claim", "Verifies a merkle proof")
-  .addParam("name", "Filename of JSON in ./tree-data")
+task("task:merkle:verify-claim", "Verifies a merkle proof")
+  .addParam("name", "Filename of JSON in ./data")
   .setAction(async ({ name, address }, hre) => {
-    const dataPath = path.join(__dirname, `../tree-data/${name}.json`);
+    const dataPath = path.join(__dirname, `../data/${name}.json`);
     const data = JSON.parse(await fs.readFile(dataPath, "utf-8"));
     const jsTree = new MerkleTree(data.leafs);
 
@@ -26,11 +26,11 @@ task("task:verify-claim", "Verifies a merkle proof")
     return result;
   });
 
-task("task:create-distribution", "Creates & posts a merkle root")
-  .addParam("name", "Filename of JSON in ./tree-data")
+task("task:merkle:create-alloc", "Creates & posts a merkle root")
+  .addParam("name", "Filename of JSON in ./data")
   .setAction(async ({ name, address }, { ethers }) => {
-    console.log("Creating distribution for /tree-data/" + name + ".json");
-    const dataPath = path.join(__dirname, `../tree-data/${name}.json`);
+    console.log("Creating distribution for /data/" + name + ".json");
+    const dataPath = path.join(__dirname, `../data/${name}.json`);
     const data = JSON.parse(await fs.readFile(dataPath, "utf-8"));
     const totalAmount = data.leafs.reduce(
       (accumulator, [_, amount]) => accumulator + BigInt(amount),
@@ -49,13 +49,13 @@ task("task:create-distribution", "Creates & posts a merkle root")
     return { jsTree, tx, totalAmount };
   });
 
-task("task:claim", "Claims allocation")
-  .addParam("name", "Filename of JSON in ./tree-data")
+task("task:merkle:claim", "Claims allocation")
+  .addParam("name", "Filename of JSON in ./data")
   .addParam("address", "Claimer address")
   .setAction(async ({ name, address }, { ethers, run }) => {
     const args = await run("task:utils:claim-args", { name, address });
     console.log(
-      `Claiming ${args[0].balance} for address ${address} in distribution /tree-data/${name}.json`
+      `Claiming ${args[0].balance} for address ${address} in distribution /data/${name}.json`
     );
     // const totalAmount = data.leafs.reduce(
     //   (accumulator, [_, amount]) => accumulator + BigInt(amount),
@@ -65,7 +65,7 @@ task("task:claim", "Claims allocation")
 
     let tx;
     const merkleOrchard = await ethers.getContract("ReFiMerkleOrchard");
-    const rfp = await ethers.getContract("ReFiPoints");
+    const rfp = await ethers.getContract("RFP");
     tx = await merkleOrchard.claimDistributions(address, args, [rfp]);
     //   jsTree.getHexRoot(),
     //   totalAmount

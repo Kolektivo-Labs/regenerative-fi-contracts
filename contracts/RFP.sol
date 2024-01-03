@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ReFiPoints is ERC20, Ownable {
+contract RFP is ERC20, Ownable {
 
     error NoMinter();
 

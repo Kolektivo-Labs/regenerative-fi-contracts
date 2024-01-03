@@ -1,51 +1,47 @@
-const {
-  loadFixture,
-} = require("@nomicfoundation/hardhat-toolbox/network-helpers");
-const { run } = require("hardhat");
 const { expect } = require("chai");
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
     const [deployer, other1, other2] = await ethers.getSigners();
-    await deployments.fixture(); // ensure you start from a fresh deployments
-    const reFiPoints = await ethers.getContract("ReFiPoints", deployer.address);
+    await deployments.fixture("RFP"); // ensure you start from a fresh deployments
+    const rfp = await ethers.getContract("RFP", deployer.address);
     return {
-      reFiPoints,
+      rfp,
       accounts: { deployer, other1, other2 },
     };
   }
 );
 
 describe("ReFi points contract", function () {
-  let reFiPoints, accounts;
+  let rfp, accounts;
 
   before("Deploy", async () => {
-    ({ reFiPoints, accounts } = await setupTest());
+    ({ rfp, accounts } = await setupTest());
   });
 
   describe("#mint", () => {
+    let other1, other2;
+
+    before(() => {
+      ({ other1, other2 } = accounts);
+    });
+
     context("without minter role", () => {
       it("reverts 'NoMinter()'", async function () {
-        const { other1, other2 } = accounts;
         await expect(
-          reFiPoints.connect(other1).mint(other2.address, "1000")
-        ).to.be.revertedWithCustomError(reFiPoints, "NoMinter");
+          rfp.connect(other1).mint(other2.address, "1000")
+        ).to.be.revertedWithCustomError(rfp, "NoMinter");
       });
     });
 
     context("with minter role", () => {
-      let other1, other2;
-
       beforeEach("set minter role", async () => {
-        ({ other1, other2 } = accounts);
-        await reFiPoints
-          .connect(accounts.deployer)
-          .enableMinter(other1.address);
+        await rfp.connect(accounts.deployer).enableMinter(other1.address);
       });
 
       it("is successful", async function () {
-        await reFiPoints.connect(other1).mint(other2.address, "1000");
-        expect(await reFiPoints.balanceOf(other2.address)).to.be.equal("1000");
+        await rfp.connect(other1).mint(other2.address, "1000");
+        expect(await rfp.balanceOf(other2.address)).to.be.equal("1000");
       });
     });
   });
@@ -55,7 +51,7 @@ describe("ReFi points contract", function () {
       it("doesn't revert", async () => {
         const { other1 } = accounts;
         await expect(
-          reFiPoints.connect(accounts.deployer).enableMinter(other1.address)
+          rfp.connect(accounts.deployer).enableMinter(other1.address)
         ).not.to.be.reverted;
       });
     });
@@ -64,7 +60,7 @@ describe("ReFi points contract", function () {
       it("doesn't revert", async () => {
         const { other1, other2 } = accounts;
         await expect(
-          reFiPoints.connect(other1).enableMinter(other2.address)
+          rfp.connect(other1).enableMinter(other2.address)
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
     });

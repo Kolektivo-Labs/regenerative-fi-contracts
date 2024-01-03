@@ -9,8 +9,6 @@ module.exports = class MerkleTree {
       return this._encodeElement(address, BigInt(balance));
     });
 
-    console.log(parsedElements);
-
     this.elements = parsedElements
       .filter((el) => el)
       .map((el) => this._stringToBuffer(el));
