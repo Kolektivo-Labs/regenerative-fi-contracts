@@ -12,20 +12,17 @@ const setupTest = deployments.createFixture(
   }
 );
 
-describe("ReFi points contract", function () {
-  let rfp, accounts;
+describe("RFP", function () {
+  let rfp, deployer, other1, other2;
 
   before("Deploy", async () => {
-    ({ rfp, accounts } = await setupTest());
+    ({
+      rfp,
+      accounts: { deployer, other1, other2 },
+    } = await setupTest());
   });
 
   describe("#mint", () => {
-    let other1, other2;
-
-    before(() => {
-      ({ other1, other2 } = accounts);
-    });
-
     context("without minter role", () => {
       it("reverts 'NoMinter()'", async function () {
         await expect(
@@ -36,7 +33,7 @@ describe("ReFi points contract", function () {
 
     context("with minter role", () => {
       beforeEach("set minter role", async () => {
-        await rfp.connect(accounts.deployer).enableMinter(other1.address);
+        await rfp.connect(deployer).enableMinter(other1.address);
       });
 
       it("is successful", async function () {
@@ -49,16 +46,13 @@ describe("ReFi points contract", function () {
   describe("#enableMinter", () => {
     context("as owner", async () => {
       it("doesn't revert", async () => {
-        const { other1 } = accounts;
-        await expect(
-          rfp.connect(accounts.deployer).enableMinter(other1.address)
-        ).not.to.be.reverted;
+        await expect(rfp.connect(deployer).enableMinter(other1.address)).not.to
+          .be.reverted;
       });
     });
 
     context("without owner role", () => {
       it("doesn't revert", async () => {
-        const { other1, other2 } = accounts;
         await expect(
           rfp.connect(other1).enableMinter(other2.address)
         ).to.be.revertedWith("Ownable: caller is not the owner");
