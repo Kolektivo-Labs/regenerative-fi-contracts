@@ -85,7 +85,7 @@ describe("RFNFT", function () {
       it("emits an event 'PointsAdded'", async () => {
         await expect(addFewPointsTx)
           .to.emit(rfnft, "PointsAdded")
-          .withArgs(tokenId, smallAmount);
+          .withArgs(tokenId, smallAmount, 0);
       });
 
       it("adds the points to the recipient's NFT", async () => {

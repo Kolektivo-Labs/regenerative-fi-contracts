@@ -17,7 +17,7 @@ contract RFNFT is ERC721, Ownable {
     error OneTokenPerAddress();
     error OwnerNotFound();
 
-    event PointsAdded(uint256 tokenId, uint256 points);
+    event PointsAdded(uint256 tokenId, uint256 points, uint256 newTier);
     event ThresholdsSet(uint256[] thresholds);
 
     // owner => tokenId
@@ -54,7 +54,7 @@ contract RFNFT is ERC721, Ownable {
         tokenIdTier[tokenId] = newTier;
         tokenIdPoints[tokenId] = newBalance;
         _rfp.transferFrom(account, address(this), points);
-        emit PointsAdded(tokenId, points);
+        emit PointsAdded(tokenId, points, newTier);
     }
 
     function getOwnerTier(address account) public view returns (uint256 tier) {
