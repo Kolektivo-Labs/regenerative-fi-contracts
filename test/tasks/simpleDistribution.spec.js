@@ -10,7 +10,7 @@ const distr1Name = "simple-test-1";
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
     const [deployer, other1, other2] = await ethers.getSigners();
-    await deployments.fixture(["RFP", "SimpleMinter"]); // ensure you start from a fresh deployments
+    await deployments.fixture(); // ensure you start from a fresh deployments
     const rfp = await ethers.getContract("RFP", deployer.address);
     const simpleMinter = await ethers.getContract(
       "SimpleMinter",
@@ -24,7 +24,7 @@ const setupTest = deployments.createFixture(
   }
 );
 
-describe("Simple distribution flow", function () {
+describe("task:simple:create-alloc", function () {
   let rfp, simpleMinter, deployer, other1, other2;
 
   before("Deploy & set minter", async () => {
@@ -43,9 +43,9 @@ describe("Simple distribution flow", function () {
       }));
     });
 
-    it("lets claimant claim", async () => {
-      await simpleMinter.claim(claimer);
-      expect(await rfp.balanceOf(claimer)).to.equal(BigInt(claimAmount));
+    it("emits event", async () => {
+      tx = await tx.wait();
+      expect(tx.logs[0].eventName).to.equal("NewAllocation");
     });
   });
 });

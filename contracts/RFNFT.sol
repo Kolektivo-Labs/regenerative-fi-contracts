@@ -15,7 +15,7 @@ import "hardhat/console.sol";
 contract RFNFT is ERC721, Ownable {
 
     error OneTokenPerAddress();
-    error OwnerNotFound();
+    error InvalidZero();
 
     event PointsAdded(uint256 tokenId, uint256 points, uint256 newTier);
     event ThresholdsSet(uint256[] thresholds);
@@ -27,6 +27,7 @@ contract RFNFT is ERC721, Ownable {
     // tokenId => points
     mapping(uint256 => uint256) public tokenIdPoints;
 
+    bool private _pointsTransferable = false;
     uint256[] private _tierThresholds;
     uint256 private _counter;
     IERC20 private _rfp;
@@ -44,17 +45,19 @@ contract RFNFT is ERC721, Ownable {
         _mint(account, _counter);
     }
 
-    function addPoints(address account) public {
-        uint256 tokenId = ownerTokenId[account];
-        if(tokenId == 0) revert OwnerNotFound(); 
-        uint256 points = _rfp.balanceOf(account);
+    /// @notice Adds points from `msg.sender` to NFT held by `account`
+    function addPointsToToken(uint256 tokenId, uint256 amount) public {
+        if(tokenId == 0) revert InvalidZero(); 
         uint256 oldBalance = tokenIdPoints[tokenId];
-        uint256 newBalance = oldBalance + points;
+        uint256 newBalance = oldBalance + amount;
         uint256 newTier = _getTierQualification(newBalance);
+
         tokenIdTier[tokenId] = newTier;
         tokenIdPoints[tokenId] = newBalance;
-        _rfp.transferFrom(account, address(this), points);
-        emit PointsAdded(tokenId, points, newTier);
+
+        _rfp.transferFrom(msg.sender, address(this), amount);
+        
+        emit PointsAdded(tokenId, amount, newTier);
     }
 
     function getOwnerTier(address account) public view returns (uint256 tier) {
@@ -76,12 +79,4 @@ contract RFNFT is ERC721, Ownable {
         }
         emit ThresholdsSet(tierThresholds);
     }
-
-    // function _evolveNFT(uint256 tokenId) private {
-        
-    // }
-
-    // function disableMinter(address account) onlyOwner external {
-    //     minters[account] = false;
-    // }
 }

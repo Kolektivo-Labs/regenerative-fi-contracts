@@ -4,10 +4,10 @@ module.exports = async ({ getNamedAccounts, deployments, ethers }) => {
 
   await deploy("SimpleMinter", {
     from: deployer.address,
-    args: [(await get("RFP")).address],
+    args: [(await get("RFP")).address, (await get("RFNFT")).address],
     log: true,
   });
 };
 
 module.exports.tags = ["SimpleMinter"];
-module.exports.dependencies = ["RFP"];
+module.exports.dependencies = ["RFP", "RFNFT"];

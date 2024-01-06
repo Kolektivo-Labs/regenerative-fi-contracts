@@ -5,14 +5,16 @@ const amount = 1000;
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
     const [deployer, other1, other2] = await ethers.getSigners();
-    await deployments.fixture(["RFP", "SimpleMinter"]); // ensure you start from a fresh deployments
+    await deployments.fixture(["RFP", "SimpleMinter", "RFNFT"]); // ensure you start from a fresh deployments
     const rfp = await ethers.getContract("RFP", deployer.address);
+    const rfnft = await ethers.getContract("RFNFT", deployer.address);
     const simpleMinter = await ethers.getContract(
       "SimpleMinter",
       deployer.address
     );
     return {
       rfp,
+      rfnft,
       simpleMinter,
       accounts: { deployer, other1, other2 },
     };
@@ -20,11 +22,12 @@ const setupTest = deployments.createFixture(
 );
 
 describe("SimpleMinter", function () {
-  let rfp, simpleMinter, deployer, other1, other2;
+  let rfp, rfnft, simpleMinter, deployer, other1, other2;
 
   beforeEach("Deploy", async () => {
     ({
       rfp,
+      rfnft,
       simpleMinter,
       accounts: { deployer, other1, other2 },
     } = await setupTest());
@@ -69,11 +72,16 @@ describe("SimpleMinter", function () {
         .createAllocation([other2.address], [BigInt(amount)]);
     });
 
+    beforeEach("mint nft", async () => {
+      await rfnft.mint(other1.address);
+      await rfnft.mint(other2.address);
+    });
+
     context("without allocation", () => {
       it("reverts 'NoMinter()'", async function () {
         await expect(
           simpleMinter.claim(other1.address)
-        ).to.be.revertedWithCustomError(simpleMinter, "InvalidZeroAllocation");
+        ).to.be.revertedWithCustomError(simpleMinter, "InvalidZero");
       });
     });
 
@@ -90,9 +98,9 @@ describe("SimpleMinter", function () {
         expect(await simpleMinter.allocations(other2.address)).to.equal(0);
       });
 
-      it("increases tha claimant's balance'", async function () {
+      it("increases tha nft contract's balance'", async function () {
         await simpleMinter.claim(other2.address);
-        expect(await rfp.balanceOf(other2.address)).to.equal(amount);
+        expect(await rfp.balanceOf(rfnft.target)).to.equal(amount);
       });
     });
   });

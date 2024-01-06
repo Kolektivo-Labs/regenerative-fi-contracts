@@ -52,10 +52,9 @@ describe("RFNFT", function () {
     });
   });
 
-  describe("#addPoints", () => {
+  describe("#addPointsToToken", () => {
     const smallAmount = 100;
     const largeAmount = 1000;
-    const tokenId = 1;
 
     beforeEach("mint & approve RFP", async () => {
       await rfp.enableMinter(deployer.address);
@@ -64,22 +63,25 @@ describe("RFNFT", function () {
     });
 
     context("when recipient doesn't hold NFT", () => {
-      it("reverts 'OwnerNotFound'", async () => {
+      it("reverts 'InvalidZero'", async () => {
         await expect(
-          rfnft.connect(other1).addPoints(other1.address)
-        ).to.be.revertedWithCustomError(rfnft, "OwnerNotFound");
+          rfnft.connect(other1).addPointsToToken(0, smallAmount)
+        ).to.be.revertedWithCustomError(rfnft, "InvalidZero");
       });
     });
 
     context("when recipient holds NFT", () => {
-      let addFewPointsTx, addManyPointsTx;
+      let addFewPointsTx, addManyPointsTx, tokenId;
 
       beforeEach("mint nft", async () => {
         await rfnft.connect(other1).mint(other1.address);
+        tokenId = await rfnft.ownerTokenId(other1.address);
       });
 
       beforeEach("add points", async () => {
-        addFewPointsTx = rfnft.connect(other1).addPoints(other1.address);
+        addFewPointsTx = rfnft
+          .connect(other1)
+          .addPointsToToken(tokenId, smallAmount);
       });
 
       it("emits an event 'PointsAdded'", async () => {
@@ -102,7 +104,9 @@ describe("RFNFT", function () {
         beforeEach("mint large amount", async () => {
           await addFewPointsTx;
           await rfp.mint(other1.address, largeAmount);
-          addManyPointsTx = rfnft.connect(other1).addPoints(other1.address);
+          addManyPointsTx = rfnft
+            .connect(other1)
+            .addPointsToToken(tokenId, largeAmount);
         });
 
         it("increases the tier of the NFT", async () => {
