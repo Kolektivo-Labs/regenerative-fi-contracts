@@ -16,9 +16,11 @@ contract RFNFT is ERC721, Ownable {
 
     error OneTokenPerAddress();
     error InvalidZero();
+    error ArrayMismatch();
 
     event PointsAdded(uint256 tokenId, uint256 points, uint256 newTier);
     event ThresholdsSet(uint256[] thresholds);
+    event UrisSet(string[] uris);
 
     // owner => tokenId
     mapping(address => uint256) public ownerTokenId;
@@ -29,8 +31,10 @@ contract RFNFT is ERC721, Ownable {
 
     bool private _pointsTransferable = false;
     uint256[] private _tierThresholds;
+    string[] private _tierUris;
     uint256 private _counter;
     IERC20 private _rfp;
+    string constant private _baseUri = "ipfs://";
 
     constructor(IERC20 rfp, uint256[] memory thresholds) ERC721("ReFi NFT","RFNFT") {
         _rfp = rfp;
@@ -60,9 +64,41 @@ contract RFNFT is ERC721, Ownable {
         emit PointsAdded(tokenId, amount, newTier);
     }
 
+    // PROTECTED FUNCTIONS
+
+    function setThresholds(uint256[] memory tierThresholds) public onlyOwner {
+        for (uint256 i; i < tierThresholds.length; i++) {
+            _tierThresholds.push(tierThresholds[i]);
+        }
+        emit ThresholdsSet(tierThresholds);
+    }
+
+    function setUris(string[] memory tierUris) public onlyOwner {
+        if(tierUris.length != _tierThresholds.length) revert ArrayMismatch();
+        for (uint256 i; i < tierUris.length; i++) {
+            _tierUris.push(tierUris[i]);
+        }
+        emit UrisSet(tierUris);
+    }
+
+    function editTier(uint256 idx, uint256 threshold, string memory uri) external onlyOwner {
+        _tierThresholds[idx] = threshold;
+        _tierUris[idx] = uri;
+    }
+
+    // GETTERS
+
     function getOwnerTier(address account) public view returns (uint256 tier) {
         tier = tokenIdTier[ownerTokenId[account]];
     }
+    
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        _requireMinted(tokenId);
+        uint256 tier = tokenIdTier[tokenId];
+        return string(abi.encodePacked(_baseUri, _tierUris[tier]));
+    }
+
+    // PRIVATE FUNCTIONS
 
     function _getTierQualification(uint256 points) private view returns (uint256 tierIndex) {
         for (uint256 i; i < _tierThresholds.length; i++) {
@@ -70,13 +106,5 @@ contract RFNFT is ERC721, Ownable {
                 tierIndex++;
             }
         }
-    }
-
-    function setThresholds(uint256[] memory tierThresholds) public onlyOwner {
-        delete _tierThresholds;
-        for (uint256 i; i < tierThresholds.length; i++) {
-            _tierThresholds.push(tierThresholds[i]);
-        }
-        emit ThresholdsSet(tierThresholds);
     }
 }

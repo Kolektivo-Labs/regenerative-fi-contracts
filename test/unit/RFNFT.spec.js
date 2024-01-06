@@ -116,4 +116,76 @@ describe("RFNFT", function () {
       });
     });
   });
+
+  describe("#setUris", () => {
+    context("as non-owner", async () => {
+      it("reverts ''", async () => {
+        await expect(rfnft.connect(other1).setUris([])).to.be.revertedWith(
+          "Ownable: caller is not the owner"
+        );
+      });
+    });
+
+    context("when number of uris is UNEQUAL to number of thresholds", () => {
+      const uris = ["QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd"];
+
+      it("reverts with error 'ArrayMismatch'", async () => {
+        await expect(rfnft.setUris(uris)).to.be.revertedWithCustomError(
+          rfnft,
+          "ArrayMismatch"
+        );
+      });
+    });
+
+    context("when number of uris is EQUAL to number of thresholds", () => {
+      const uris = [
+        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd",
+        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKe",
+        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKf",
+        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKg",
+      ];
+      const amount = 499;
+      const additionalAmount = 10;
+
+      let tokenId;
+
+      beforeEach("set uris", async () => {
+        await rfnft.setUris(uris);
+      });
+
+      beforeEach("mint tokens & approve", async () => {
+        await rfp.enableMinter(deployer.address);
+        await rfnft.mint(deployer.address);
+        await rfp.mint(deployer.address, amount + additionalAmount);
+        await rfp.approve(rfnft.target, amount + additionalAmount);
+        tokenId = await rfnft.ownerTokenId(deployer.address);
+      });
+
+      context("with token in first tier", () => {
+        beforeEach("add points to token", async () => {
+          await rfnft.addPointsToToken(tokenId, amount);
+          const tokenPoints = await rfnft.tokenIdPoints(tokenId);
+          expect(tokenPoints).to.equal(amount);
+        });
+
+        it("returns the uri for the first tier", async () => {
+          const uri = await rfnft.tokenURI(tokenId);
+          expect(uri).to.equal("ipfs://" + uris[0]);
+        });
+      });
+
+      context("with token in second tier", () => {
+        beforeEach("add points to token", async () => {
+          await rfnft.addPointsToToken(tokenId, amount + additionalAmount);
+          const tokenPoints = await rfnft.tokenIdPoints(tokenId);
+          expect(tokenPoints).to.equal(amount + additionalAmount);
+        });
+
+        it("returns the uri for the second tier", async () => {
+          const uri = await rfnft.tokenURI(tokenId);
+          expect(uri).to.equal("ipfs://" + uris[1]);
+        });
+      });
+    });
+  });
 });
