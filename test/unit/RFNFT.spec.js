@@ -188,4 +188,24 @@ describe("RFNFT", function () {
       });
     });
   });
+
+  describe("#setThresholds", () => {
+    context("when called by non-owner", () => {
+      it("reverts 'Ownable: caller is not the owner'", async () => {
+        await expect(
+          rfnft.connect(other1).setThresholds([])
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+    });
+  });
+
+  describe("#editTier", () => {
+    context("when called by non-owner", () => {
+      it("reverts 'Ownable: caller is not the owner'", async () => {
+        await expect(
+          rfnft.connect(other1).editTier(0, 100, "abc")
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+    });
+  });
 });
