@@ -5,7 +5,7 @@ const { expect } = require("chai");
 
 const claimer = "0x5ACf124AD6333D3B23E391C37AA7B561d61Ec053";
 const claimAmount = "2000000000000000000000";
-const distr1Name = "simple-test-1";
+const distr1Name = "test";
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
@@ -24,7 +24,7 @@ const setupTest = deployments.createFixture(
   }
 );
 
-describe("task:simple:create-alloc", function () {
+describe("task:create-alloc", function () {
   let rfp, simpleMinter, deployer, other1, other2;
 
   before("Deploy & set minter", async () => {
@@ -38,7 +38,7 @@ describe("task:simple:create-alloc", function () {
 
   context("first epoch", () => {
     before("setup allocation", async () => {
-      ({ tx } = await run("task:simple:create-alloc", {
+      ({ tx } = await run("task:create-alloc", {
         name: distr1Name,
       }));
     });

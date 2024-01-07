@@ -6,7 +6,7 @@ const { expect } = require("chai");
 const THRESHOLDS = [500, 1000, 2000, 3000];
 const claimer = "0x5ACf124AD6333D3B23E391C37AA7B561d61Ec053";
 const claimAmount = "2000000000000000000000";
-const distr1Name = "simple-test-1";
+const distr1Name = "test";
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
@@ -49,7 +49,7 @@ describe("Flow: Deploy > Alloc > Claim", function () {
   });
 
   before("create allocation", async () => {
-    ({ tx } = await run("task:simple:create-alloc", {
+    ({ tx } = await run("task:create-alloc", {
       name: distr1Name,
     }));
   });
