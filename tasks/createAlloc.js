@@ -23,12 +23,26 @@ task("task:create-alloc", "Creates allocation")
       amounts.push(BigInt(amount));
     }
 
-    let tx;
-    const simpleMinter = await ethers.getContract("SimpleMinter");
-    tx = await simpleMinter.createAllocation(accounts, amounts);
-    console.log("Created distribution at tx: ", tx.hash);
+    const chunkSize = 400;
+    const args = [];
+    for (let i = 0; i < accounts.length; i += chunkSize) {
+      const accountsChunk = accounts.slice(i, i + chunkSize);
+      const amountsChunk = amounts.slice(i, i + chunkSize);
+      args.push([accountsChunk, amountsChunk]);
+    }
 
-    return { tx };
+    const txs = [];
+    const simpleMinter = await ethers.getContract("SimpleMinter");
+    for (let i = 0; i < args.length; i++) {
+      const tx = await simpleMinter.createAllocation(args[i][0], args[i][1]);
+      txs.push(tx);
+      console.log(
+        `Created distribution with ${args[i][0].length} recipients at tx: `,
+        tx.hash
+      );
+    }
+
+    return { txs };
   });
 
 task(
@@ -122,7 +136,7 @@ task(
   console.info("# total points allocated: ", totalPoints);
 
   console.log("Storing allocation as JSON");
-  const content = JSON.stringify(pointAllocations);
+  const content = JSON.stringify(Object.entries(pointAllocations));
   const contentPath = path.join(
     __dirname,
     `../data/${network.name}/${epochEnd}.json`

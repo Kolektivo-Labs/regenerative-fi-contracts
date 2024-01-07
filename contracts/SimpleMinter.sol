@@ -9,8 +9,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract SimpleMinter is Ownable {
 
     error InvalidZero();
+    error ArrayMismatch();
+    error InvalidZeroAllocation();
 
-    event NewAllocation(uint256 blockNumber);
+    event NewAllocation(uint256 amountClaimers);
 
     // user => refi points allocation
     mapping(address => uint256) public allocations;
@@ -37,9 +39,13 @@ contract SimpleMinter is Ownable {
     }
 
     function createAllocation(address[] memory accounts, uint256[] memory amounts) onlyOwner external {
+        if(accounts.length == 0) revert InvalidZeroAllocation();
+        if(accounts.length != amounts.length) revert ArrayMismatch();
+
         for (uint256 i = 0; i < accounts.length; i++) {
             allocations[accounts[i]] += amounts[i];
         }
-        emit NewAllocation(block.number);
+
+        emit NewAllocation(accounts.length);
     }
 }
