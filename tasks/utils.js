@@ -1,5 +1,6 @@
 const { DateTime } = require("luxon");
 const { campaigns } = require("../config.js");
+const { ethers } = require("ethers");
 
 function getEpoch() {
   const midnightConfig = {
@@ -36,4 +37,8 @@ function getPointsAllocation(indicator, campaignName) {
   return allocation;
 }
 
-module.exports = { getEpoch, getPointsAllocation };
+function numsTo18Dec(nums) {
+  return nums.map((num) => ethers.parseEther(num.toString()));
+}
+
+module.exports = { getEpoch, getPointsAllocation, numsTo18Dec };

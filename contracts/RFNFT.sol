@@ -6,11 +6,6 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
-
-// every address can only own one NFT
-
 
 contract RFNFT is ERC721, Ownable {
 
@@ -95,7 +90,7 @@ contract RFNFT is ERC721, Ownable {
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireMinted(tokenId);
         uint256 tier = tokenIdTier[tokenId];
-        return string(abi.encodePacked(_baseUri, _tierUris[tier]));
+        return string(abi.encodePacked(_baseUri, _tierUris[tier - 1]));
     }
 
     // PRIVATE FUNCTIONS

@@ -15,7 +15,7 @@ const setupTest = deployments.createFixture(
 describe("RFP", function () {
   let rfp, deployer, other1, other2;
 
-  before("Deploy", async () => {
+  beforeEach("Deploy", async () => {
     ({
       rfp,
       accounts: { deployer, other1, other2 },

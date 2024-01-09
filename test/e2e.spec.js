@@ -1,11 +1,8 @@
-const path = require("path");
-const fs = require("fs/promises");
-const { run, ethers } = require("hardhat");
+const { run } = require("hardhat");
 const { expect } = require("chai");
 
-const THRESHOLDS = [500, 1000, 2000, 3000];
 const claimer = "0x5ACf124AD6333D3B23E391C37AA7B561d61Ec053";
-const claimAmount = "2000000000000000000000";
+const claimAmount = "200000000000000000000";
 const distr1Name = "test-small";
 
 const setupTest = deployments.createFixture(
@@ -44,10 +41,6 @@ describe("Flow: Deploy > Alloc > Claim", function () {
     await rfp.enableMinter(simpleMinter.target);
   });
 
-  before("Set tier thresholds on NFT", async () => {
-    await rfnft.setThresholds(THRESHOLDS.map((t) => BigInt(t)));
-  });
-
   before("create allocation", async () => {
     ({ tx } = await run("task:create-alloc", {
       name: distr1Name,
@@ -65,6 +58,8 @@ describe("Flow: Deploy > Alloc > Claim", function () {
   });
 
   describe("claiming points", () => {
+    const expectedTier = 2;
+
     before("claim points", async () => {
       await simpleMinter.claim(claimer);
     });
@@ -72,6 +67,12 @@ describe("Flow: Deploy > Alloc > Claim", function () {
     it("increases points held by claimer's token", async () => {
       const tokenId = await rfnft.ownerTokenId(claimer);
       expect(await rfnft.tokenIdPoints(tokenId)).to.equal(claimAmount);
+    });
+
+    it("evolves claimer's token", async () => {
+      const tokenId = await rfnft.ownerTokenId(claimer);
+
+      expect(await rfnft.tokenIdTier(tokenId)).to.equal(expectedTier);
     });
   });
 });

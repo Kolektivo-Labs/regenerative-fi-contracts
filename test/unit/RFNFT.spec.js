@@ -1,13 +1,11 @@
 const { expect } = require("chai");
-
-const THRESHOLDS = [500, 1000, 2000, 3000];
+const { ethers } = require("ethers");
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
     const [deployer, other1, other2] = await ethers.getSigners();
     await deployments.fixture(["RFNFT", "RFP"]); // ensure you start from a fresh deployments
     const rfnft = await ethers.getContract("RFNFT", deployer.address);
-    await rfnft.setThresholds(THRESHOLDS.map((t) => BigInt(t)));
     const rfp = await ethers.getContract("RFP", deployer.address);
     return {
       rfnft,
@@ -53,13 +51,15 @@ describe("RFNFT", function () {
   });
 
   describe("#feedToken", () => {
-    const smallAmount = 100;
-    const largeAmount = 1000;
+    const smallAmount = ethers.parseEther("10");
+    const largeAmount = ethers.parseEther("1000");
 
     beforeEach("mint & approve RFP", async () => {
       await rfp.enableMinter(deployer.address);
       await rfp.mint(other1.address, smallAmount);
-      await rfp.connect(other1).approve(rfnft.target, 1000000000000000);
+      await rfp
+        .connect(other1)
+        .approve(rfnft.target, ethers.parseEther("99999999999"));
     });
 
     context("when recipient doesn't hold NFT", () => {
@@ -78,27 +78,36 @@ describe("RFNFT", function () {
         tokenId = await rfnft.ownerTokenId(other1.address);
       });
 
-      beforeEach("add points", async () => {
-        addFewPointsTx = rfnft.connect(other1).feedToken(tokenId, smallAmount);
-      });
+      context("with small amount of points added", () => {
+        const firstTier = 1;
 
-      it("emits an event 'PointsAdded'", async () => {
-        await expect(addFewPointsTx)
-          .to.emit(rfnft, "PointsAdded")
-          .withArgs(tokenId, smallAmount, 0);
-      });
+        beforeEach("add points", async () => {
+          addFewPointsTx = rfnft
+            .connect(other1)
+            .feedToken(tokenId, smallAmount);
+        });
 
-      it("adds the points to the recipient's NFT", async () => {
-        await addFewPointsTx;
-        expect(await rfnft.tokenIdPoints(tokenId)).to.equal(smallAmount);
-      });
+        it("emits an event 'PointsAdded'", async () => {
+          await expect(addFewPointsTx)
+            .to.emit(rfnft, "PointsAdded")
+            .withArgs(tokenId, smallAmount, firstTier);
+        });
 
-      it("doesn't change the tier of the NFT", async () => {
-        await addFewPointsTx;
-        expect(await rfnft.tokenIdTier(tokenId)).to.equal(0);
+        it("adds the points to the recipient's NFT", async () => {
+          await addFewPointsTx;
+          expect(await rfnft.tokenIdPoints(tokenId)).to.equal(smallAmount);
+        });
+
+        it("doesn't change the tier of the NFT", async () => {
+          expect(await rfnft.tokenIdTier(tokenId)).to.equal(firstTier);
+          await addFewPointsTx;
+          expect(await rfnft.tokenIdTier(tokenId)).to.equal(firstTier);
+        });
       });
 
       context("when new addition pushes NFT balance to next tier", () => {
+        const fourthTier = 4;
+
         beforeEach("mint large amount", async () => {
           await addFewPointsTx;
           await rfp.mint(other1.address, largeAmount);
@@ -109,7 +118,7 @@ describe("RFNFT", function () {
 
         it("increases the tier of the NFT", async () => {
           await addManyPointsTx;
-          expect(await rfnft.tokenIdTier(tokenId)).to.equal(2);
+          expect(await rfnft.tokenIdTier(tokenId)).to.equal(fourthTier);
         });
       });
     });
@@ -141,9 +150,11 @@ describe("RFNFT", function () {
         "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKe",
         "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKf",
         "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKg",
+        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKh",
+        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKi",
       ];
-      const amount = 499;
-      const additionalAmount = 10;
+      const amount = ethers.parseEther("49");
+      const additionalAmount = ethers.parseEther("1");
 
       let tokenId;
 

@@ -4,7 +4,7 @@ const { expect } = require("chai");
 const smallAllocation = "test-small";
 const largeAllocation = "test-large";
 const claimer = "0x5ACf124AD6333D3B23E391C37AA7B561d61Ec053";
-const claimAmount = "2000000000000000000000";
+const claimAmount = "200000000000000000000";
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
@@ -28,14 +28,13 @@ const setupTest = deployments.createFixture(
 describe("task:create-alloc", function () {
   let rfp, rfnft, simpleMinter;
 
-  before("Deploy & set minter", async () => {
+  before("Deploy", async () => {
     ({
       rfp,
       rfnft,
       simpleMinter,
       accounts: { deployer, other1, other2 },
     } = await setupTest());
-    await rfp.enableMinter(simpleMinter.target);
   });
 
   context("with small allocation", () => {

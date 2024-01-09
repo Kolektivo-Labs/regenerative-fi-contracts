@@ -65,8 +65,7 @@ describe("SimpleMinter", function () {
   });
 
   describe("#claim", () => {
-    beforeEach("set minter & create allocation", async () => {
-      await rfp.enableMinter(simpleMinter.target);
+    beforeEach("create allocation", async () => {
       await simpleMinter
         .connect(deployer)
         .createAllocation([other2.address], [BigInt(amount)]);
