@@ -1,5 +1,5 @@
 const { DateTime } = require("luxon");
-const { campaigns } = require("./config.js");
+const { campaigns } = require("../config.js");
 
 function getEpoch() {
   const midnightConfig = {

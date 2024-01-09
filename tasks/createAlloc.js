@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
-const { subgraph } = require("./config.js");
+const { subgraph } = require("../config.js");
 const { getEpoch, getPointsAllocation } = require("./utils.js");
 const axios = require("axios");
 
