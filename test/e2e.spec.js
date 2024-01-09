@@ -37,10 +37,6 @@ describe("Flow: Deploy > Alloc > Claim", function () {
     } = await setupTest());
   });
 
-  before("Set minter on points contract", async () => {
-    await rfp.enableMinter(simpleMinter.target);
-  });
-
   before("create allocation", async () => {
     ({ tx } = await run("task:create-alloc", {
       name: distr1Name,

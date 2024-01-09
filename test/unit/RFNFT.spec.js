@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("ethers");
+const { nftTiers } = require("../../config.js");
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
@@ -120,90 +121,39 @@ describe("RFNFT", function () {
           await addManyPointsTx;
           expect(await rfnft.tokenIdTier(tokenId)).to.equal(fourthTier);
         });
+
+        it("changes the metadata uri that is returned for that token", async () => {
+          expect(await rfnft.tokenURI(tokenId)).to.equal(
+            "ipfs://" + nftTiers.ipfsHashes[0]
+          );
+          await addManyPointsTx;
+          expect(await rfnft.tokenURI(tokenId)).to.equal(
+            "ipfs://" + nftTiers.ipfsHashes[3]
+          );
+        });
       });
     });
   });
 
-  describe("#setUris", () => {
+  describe("#addTier", () => {
+    const newTier = {
+      threshold: ethers.parseEther("3000"),
+      uri: "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd",
+    };
+
     context("as non-owner", async () => {
-      it("reverts ''", async () => {
-        await expect(rfnft.connect(other1).setUris([])).to.be.revertedWith(
-          "Ownable: caller is not the owner"
-        );
-      });
-    });
-
-    context("when number of uris is UNEQUAL to number of thresholds", () => {
-      const uris = ["QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd"];
-
-      it("reverts with error 'ArrayMismatch'", async () => {
-        await expect(rfnft.setUris(uris)).to.be.revertedWithCustomError(
-          rfnft,
-          "ArrayMismatch"
-        );
-      });
-    });
-
-    context("when number of uris is EQUAL to number of thresholds", () => {
-      const uris = [
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKe",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKf",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKg",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKh",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKi",
-      ];
-      const amount = ethers.parseEther("49");
-      const additionalAmount = ethers.parseEther("1");
-
-      let tokenId;
-
-      beforeEach("set uris", async () => {
-        await rfnft.setUris(uris);
-      });
-
-      beforeEach("mint tokens & approve", async () => {
-        await rfp.enableMinter(deployer.address);
-        await rfnft.mint(deployer.address);
-        await rfp.mint(deployer.address, amount + additionalAmount);
-        await rfp.approve(rfnft.target, amount + additionalAmount);
-        tokenId = await rfnft.ownerTokenId(deployer.address);
-      });
-
-      context("with token in first tier", () => {
-        beforeEach("add points to token", async () => {
-          await rfnft.feedToken(tokenId, amount);
-          const tokenPoints = await rfnft.tokenIdPoints(tokenId);
-          expect(tokenPoints).to.equal(amount);
-        });
-
-        it("returns the uri for the first tier", async () => {
-          const uri = await rfnft.tokenURI(tokenId);
-          expect(uri).to.equal("ipfs://" + uris[0]);
-        });
-      });
-
-      context("with token in second tier", () => {
-        beforeEach("add points to token", async () => {
-          await rfnft.feedToken(tokenId, amount + additionalAmount);
-          const tokenPoints = await rfnft.tokenIdPoints(tokenId);
-          expect(tokenPoints).to.equal(amount + additionalAmount);
-        });
-
-        it("returns the uri for the second tier", async () => {
-          const uri = await rfnft.tokenURI(tokenId);
-          expect(uri).to.equal("ipfs://" + uris[1]);
-        });
-      });
-    });
-  });
-
-  describe("#setThresholds", () => {
-    context("when called by non-owner", () => {
       it("reverts 'Ownable: caller is not the owner'", async () => {
         await expect(
-          rfnft.connect(other1).setThresholds([])
+          rfnft.connect(other1).addTier(newTier.threshold, newTier.uri)
         ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+    });
+
+    context("as owner", () => {
+      it("emits event", async () => {
+        await expect(rfnft.addTier(newTier.threshold, newTier.uri))
+          .to.emit(rfnft, "NewTier")
+          .withArgs(newTier.threshold, newTier.uri);
       });
     });
   });

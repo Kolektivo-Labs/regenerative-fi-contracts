@@ -7,7 +7,7 @@ module.exports = async ({ getNamedAccounts, deployments, ethers }) => {
 
   await deploy("RFNFT", {
     from: deployer.address,
-    args: [rfp.target, nftTiers.pointThresholds],
+    args: [rfp.target, nftTiers.pointThresholds, nftTiers.ipfsHashes],
     log: true,
   });
 };
