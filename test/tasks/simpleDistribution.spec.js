@@ -25,7 +25,7 @@ const setupTest = deployments.createFixture(
   }
 );
 
-describe.only("task:create-alloc", function () {
+describe("task:create-alloc", function () {
   let rfp, rfnft, simpleMinter;
 
   before("Deploy & set minter", async () => {
