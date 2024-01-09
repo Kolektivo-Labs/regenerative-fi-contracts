@@ -9,7 +9,11 @@ module.exports = async ({ getNamedAccounts, deployments, ethers }) => {
     log: true,
   });
 
-  await rfp.enableMinter(simpleMinter.address);
+  const tx = await rfp.enableMinter(simpleMinter.address);
+  console.log(
+    `enable minter role for 'SimpleMinter' contract (tx: ${tx.hash})`
+  );
+  await tx.wait();
 };
 
 module.exports.tags = ["SimpleMinter"];
