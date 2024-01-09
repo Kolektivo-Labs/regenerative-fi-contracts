@@ -50,7 +50,7 @@ contract RFNFT is ERC721, Ownable {
     }
 
     /// @notice Adds points from `msg.sender` to NFT held by `account`
-    function addPointsToToken(uint256 tokenId, uint256 amount) public {
+    function feedToken(uint256 tokenId, uint256 amount) public {
         if(tokenId == 0) revert InvalidZero(); 
         uint256 oldBalance = tokenIdPoints[tokenId];
         uint256 newBalance = oldBalance + amount;

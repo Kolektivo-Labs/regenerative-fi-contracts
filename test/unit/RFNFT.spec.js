@@ -52,7 +52,7 @@ describe("RFNFT", function () {
     });
   });
 
-  describe("#addPointsToToken", () => {
+  describe("#feedToken", () => {
     const smallAmount = 100;
     const largeAmount = 1000;
 
@@ -65,7 +65,7 @@ describe("RFNFT", function () {
     context("when recipient doesn't hold NFT", () => {
       it("reverts 'InvalidZero'", async () => {
         await expect(
-          rfnft.connect(other1).addPointsToToken(0, smallAmount)
+          rfnft.connect(other1).feedToken(0, smallAmount)
         ).to.be.revertedWithCustomError(rfnft, "InvalidZero");
       });
     });
@@ -79,9 +79,7 @@ describe("RFNFT", function () {
       });
 
       beforeEach("add points", async () => {
-        addFewPointsTx = rfnft
-          .connect(other1)
-          .addPointsToToken(tokenId, smallAmount);
+        addFewPointsTx = rfnft.connect(other1).feedToken(tokenId, smallAmount);
       });
 
       it("emits an event 'PointsAdded'", async () => {
@@ -106,7 +104,7 @@ describe("RFNFT", function () {
           await rfp.mint(other1.address, largeAmount);
           addManyPointsTx = rfnft
             .connect(other1)
-            .addPointsToToken(tokenId, largeAmount);
+            .feedToken(tokenId, largeAmount);
         });
 
         it("increases the tier of the NFT", async () => {
@@ -163,7 +161,7 @@ describe("RFNFT", function () {
 
       context("with token in first tier", () => {
         beforeEach("add points to token", async () => {
-          await rfnft.addPointsToToken(tokenId, amount);
+          await rfnft.feedToken(tokenId, amount);
           const tokenPoints = await rfnft.tokenIdPoints(tokenId);
           expect(tokenPoints).to.equal(amount);
         });
@@ -176,7 +174,7 @@ describe("RFNFT", function () {
 
       context("with token in second tier", () => {
         beforeEach("add points to token", async () => {
-          await rfnft.addPointsToToken(tokenId, amount + additionalAmount);
+          await rfnft.feedToken(tokenId, amount + additionalAmount);
           const tokenPoints = await rfnft.tokenIdPoints(tokenId);
           expect(tokenPoints).to.equal(amount + additionalAmount);
         });
