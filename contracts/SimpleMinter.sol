@@ -29,11 +29,11 @@ contract SimpleMinter is Ownable {
         uint256 alloc = allocations[account];
         // check if account has allocation
         if(alloc == 0) revert InvalidZero();
-        // mint tokens to this contract, approve nft contract and call addPointsToToken
+        // mint tokens to this contract, approve nft contract and call feedToken
         _rfp.mint(address(this), alloc);
         _rfp.approve(address(_rfnft), alloc);
         uint256 tokenId = _rfnft.ownerTokenId(account);
-        _rfnft.addPointsToToken(tokenId, alloc);
+        _rfnft.feedToken(tokenId, alloc);
         // accounting: set allocation to zero
         allocations[account] = 0;
     }

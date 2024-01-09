@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
-const { subgraph } = require("./config.js");
+const { subgraph } = require("../config.js");
 const { getEpoch, getPointsAllocation } = require("./utils.js");
 const axios = require("axios");
 
@@ -49,7 +49,7 @@ task(
   "task:get-data",
   "Pulls swap data from subgraph and creates JSON file w/ alloc"
 ).setAction(async (_, { ethers, network }) => {
-  const campaignName = "alpha";
+  const campaignName = "alphaWeeklySwapVolume";
   console.log(
     `\nTASK: retrieve subgraph data, compute and store points allocation for alpha campaign for network ${network.name}`
   );

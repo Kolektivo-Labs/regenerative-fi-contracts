@@ -1,13 +1,12 @@
 const { expect } = require("chai");
-
-const THRESHOLDS = [500, 1000, 2000, 3000];
+const { ethers } = require("ethers");
+const { nftTiers } = require("../../config.js");
 
 const setupTest = deployments.createFixture(
   async ({ deployments, getNamedAccounts, ethers }, options) => {
     const [deployer, other1, other2] = await ethers.getSigners();
     await deployments.fixture(["RFNFT", "RFP"]); // ensure you start from a fresh deployments
     const rfnft = await ethers.getContract("RFNFT", deployer.address);
-    await rfnft.setThresholds(THRESHOLDS.map((t) => BigInt(t)));
     const rfp = await ethers.getContract("RFP", deployer.address);
     return {
       rfnft,
@@ -52,20 +51,22 @@ describe("RFNFT", function () {
     });
   });
 
-  describe("#addPointsToToken", () => {
-    const smallAmount = 100;
-    const largeAmount = 1000;
+  describe("#feedToken", () => {
+    const smallAmount = ethers.parseEther("10");
+    const largeAmount = ethers.parseEther("1000");
 
     beforeEach("mint & approve RFP", async () => {
       await rfp.enableMinter(deployer.address);
       await rfp.mint(other1.address, smallAmount);
-      await rfp.connect(other1).approve(rfnft.target, 1000000000000000);
+      await rfp
+        .connect(other1)
+        .approve(rfnft.target, ethers.parseEther("99999999999"));
     });
 
     context("when recipient doesn't hold NFT", () => {
       it("reverts 'InvalidZero'", async () => {
         await expect(
-          rfnft.connect(other1).addPointsToToken(0, smallAmount)
+          rfnft.connect(other1).feedToken(0, smallAmount)
         ).to.be.revertedWithCustomError(rfnft, "InvalidZero");
       });
     });
@@ -78,123 +79,81 @@ describe("RFNFT", function () {
         tokenId = await rfnft.ownerTokenId(other1.address);
       });
 
-      beforeEach("add points", async () => {
-        addFewPointsTx = rfnft
-          .connect(other1)
-          .addPointsToToken(tokenId, smallAmount);
-      });
+      context("with small amount of points added", () => {
+        const firstTier = 1;
 
-      it("emits an event 'PointsAdded'", async () => {
-        await expect(addFewPointsTx)
-          .to.emit(rfnft, "PointsAdded")
-          .withArgs(tokenId, smallAmount, 0);
-      });
+        beforeEach("add points", async () => {
+          addFewPointsTx = rfnft
+            .connect(other1)
+            .feedToken(tokenId, smallAmount);
+        });
 
-      it("adds the points to the recipient's NFT", async () => {
-        await addFewPointsTx;
-        expect(await rfnft.tokenIdPoints(tokenId)).to.equal(smallAmount);
-      });
+        it("emits an event 'PointsAdded'", async () => {
+          await expect(addFewPointsTx)
+            .to.emit(rfnft, "PointsAdded")
+            .withArgs(tokenId, smallAmount, firstTier);
+        });
 
-      it("doesn't change the tier of the NFT", async () => {
-        await addFewPointsTx;
-        expect(await rfnft.tokenIdTier(tokenId)).to.equal(0);
+        it("adds the points to the recipient's NFT", async () => {
+          await addFewPointsTx;
+          expect(await rfnft.tokenIdPoints(tokenId)).to.equal(smallAmount);
+        });
+
+        it("doesn't change the tier of the NFT", async () => {
+          expect(await rfnft.tokenIdTier(tokenId)).to.equal(firstTier);
+          await addFewPointsTx;
+          expect(await rfnft.tokenIdTier(tokenId)).to.equal(firstTier);
+        });
       });
 
       context("when new addition pushes NFT balance to next tier", () => {
+        const fourthTier = 4;
+
         beforeEach("mint large amount", async () => {
           await addFewPointsTx;
           await rfp.mint(other1.address, largeAmount);
           addManyPointsTx = rfnft
             .connect(other1)
-            .addPointsToToken(tokenId, largeAmount);
+            .feedToken(tokenId, largeAmount);
         });
 
         it("increases the tier of the NFT", async () => {
           await addManyPointsTx;
-          expect(await rfnft.tokenIdTier(tokenId)).to.equal(2);
+          expect(await rfnft.tokenIdTier(tokenId)).to.equal(fourthTier);
+        });
+
+        it("changes the metadata uri that is returned for that token", async () => {
+          expect(await rfnft.tokenURI(tokenId)).to.equal(
+            "ipfs://" + nftTiers.ipfsHashes[0]
+          );
+          await addManyPointsTx;
+          expect(await rfnft.tokenURI(tokenId)).to.equal(
+            "ipfs://" + nftTiers.ipfsHashes[3]
+          );
         });
       });
     });
   });
 
-  describe("#setUris", () => {
+  describe("#addTier", () => {
+    const newTier = {
+      threshold: ethers.parseEther("3000"),
+      uri: "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd",
+    };
+
     context("as non-owner", async () => {
-      it("reverts ''", async () => {
-        await expect(rfnft.connect(other1).setUris([])).to.be.revertedWith(
-          "Ownable: caller is not the owner"
-        );
-      });
-    });
-
-    context("when number of uris is UNEQUAL to number of thresholds", () => {
-      const uris = ["QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd"];
-
-      it("reverts with error 'ArrayMismatch'", async () => {
-        await expect(rfnft.setUris(uris)).to.be.revertedWithCustomError(
-          rfnft,
-          "ArrayMismatch"
-        );
-      });
-    });
-
-    context("when number of uris is EQUAL to number of thresholds", () => {
-      const uris = [
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKe",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKf",
-        "QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKg",
-      ];
-      const amount = 499;
-      const additionalAmount = 10;
-
-      let tokenId;
-
-      beforeEach("set uris", async () => {
-        await rfnft.setUris(uris);
-      });
-
-      beforeEach("mint tokens & approve", async () => {
-        await rfp.enableMinter(deployer.address);
-        await rfnft.mint(deployer.address);
-        await rfp.mint(deployer.address, amount + additionalAmount);
-        await rfp.approve(rfnft.target, amount + additionalAmount);
-        tokenId = await rfnft.ownerTokenId(deployer.address);
-      });
-
-      context("with token in first tier", () => {
-        beforeEach("add points to token", async () => {
-          await rfnft.addPointsToToken(tokenId, amount);
-          const tokenPoints = await rfnft.tokenIdPoints(tokenId);
-          expect(tokenPoints).to.equal(amount);
-        });
-
-        it("returns the uri for the first tier", async () => {
-          const uri = await rfnft.tokenURI(tokenId);
-          expect(uri).to.equal("ipfs://" + uris[0]);
-        });
-      });
-
-      context("with token in second tier", () => {
-        beforeEach("add points to token", async () => {
-          await rfnft.addPointsToToken(tokenId, amount + additionalAmount);
-          const tokenPoints = await rfnft.tokenIdPoints(tokenId);
-          expect(tokenPoints).to.equal(amount + additionalAmount);
-        });
-
-        it("returns the uri for the second tier", async () => {
-          const uri = await rfnft.tokenURI(tokenId);
-          expect(uri).to.equal("ipfs://" + uris[1]);
-        });
-      });
-    });
-  });
-
-  describe("#setThresholds", () => {
-    context("when called by non-owner", () => {
       it("reverts 'Ownable: caller is not the owner'", async () => {
         await expect(
-          rfnft.connect(other1).setThresholds([])
+          rfnft.connect(other1).addTier(newTier.threshold, newTier.uri)
         ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+    });
+
+    context("as owner", () => {
+      it("emits event", async () => {
+        await expect(rfnft.addTier(newTier.threshold, newTier.uri))
+          .to.emit(rfnft, "NewTier")
+          .withArgs(newTier.threshold, newTier.uri);
       });
     });
   });

@@ -6,18 +6,14 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
-
-// every address can only own one NFT
-
 
 contract RFNFT is ERC721, Ownable {
 
     error OneTokenPerAddress();
     error InvalidZero();
-    error ArrayMismatch();
+    error InvalidTier();
 
+    event NewTier(uint256, string);
     event PointsAdded(uint256 tokenId, uint256 points, uint256 newTier);
     event ThresholdsSet(uint256[] thresholds);
     event UrisSet(string[] uris);
@@ -36,9 +32,11 @@ contract RFNFT is ERC721, Ownable {
     IERC20 private _rfp;
     string constant private _baseUri = "ipfs://";
 
-    constructor(IERC20 rfp, uint256[] memory thresholds) ERC721("ReFi NFT","RFNFT") {
+    constructor(IERC20 rfp, uint256[] memory thresholds, string[] memory uris) ERC721("ReFi NFT","RFNFT") {
         _rfp = rfp;
-        setThresholds(thresholds);
+        for (uint256 i; i < thresholds.length; i++) {
+            addTier(thresholds[i], uris[i]);
+        }
     }
 
     function mint(address account) public {
@@ -50,7 +48,7 @@ contract RFNFT is ERC721, Ownable {
     }
 
     /// @notice Adds points from `msg.sender` to NFT held by `account`
-    function addPointsToToken(uint256 tokenId, uint256 amount) public {
+    function feedToken(uint256 tokenId, uint256 amount) public {
         if(tokenId == 0) revert InvalidZero(); 
         uint256 oldBalance = tokenIdPoints[tokenId];
         uint256 newBalance = oldBalance + amount;
@@ -64,21 +62,11 @@ contract RFNFT is ERC721, Ownable {
         emit PointsAdded(tokenId, amount, newTier);
     }
 
-    // PROTECTED FUNCTIONS
 
-    function setThresholds(uint256[] memory tierThresholds) public onlyOwner {
-        for (uint256 i; i < tierThresholds.length; i++) {
-            _tierThresholds.push(tierThresholds[i]);
-        }
-        emit ThresholdsSet(tierThresholds);
-    }
-
-    function setUris(string[] memory tierUris) public onlyOwner {
-        if(tierUris.length != _tierThresholds.length) revert ArrayMismatch();
-        for (uint256 i; i < tierUris.length; i++) {
-            _tierUris.push(tierUris[i]);
-        }
-        emit UrisSet(tierUris);
+    function addTier(uint256 threshold, string memory uri) public onlyOwner {
+        _tierThresholds.push(threshold);
+        _tierUris.push(uri);
+        emit NewTier(threshold, uri);
     }
 
     function editTier(uint256 idx, uint256 threshold, string memory uri) external onlyOwner {
@@ -95,7 +83,7 @@ contract RFNFT is ERC721, Ownable {
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireMinted(tokenId);
         uint256 tier = tokenIdTier[tokenId];
-        return string(abi.encodePacked(_baseUri, _tierUris[tier]));
+        return string(abi.encodePacked(_baseUri, _tierUris[tier - 1]));
     }
 
     // PRIVATE FUNCTIONS
