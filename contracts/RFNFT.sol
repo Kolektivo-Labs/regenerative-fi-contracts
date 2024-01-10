@@ -79,6 +79,10 @@ contract RFNFT is ERC721, Ownable {
     function getOwnerTier(address account) public view returns (uint256 tier) {
         tier = tokenIdTier[ownerTokenId[account]];
     }
+
+    function getOwnerPoints(address account) public view returns (uint256 tier) {
+        tier = tokenIdPoints[ownerTokenId[account]];
+    }
     
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireMinted(tokenId);
