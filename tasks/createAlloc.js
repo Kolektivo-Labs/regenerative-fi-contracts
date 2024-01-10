@@ -4,7 +4,7 @@ const { subgraph } = require("../config.js");
 const { getEpoch, getPointsAllocation } = require("./utils.js");
 const axios = require("axios");
 
-task("task:create-alloc", "Creates allocation")
+task("task:create-alloc", "Push allocation onchain")
   .addParam("name", "Filename of JSON in ./data")
   .setAction(async ({ name }, { ethers, network }) => {
     console.log("TASK: post points allocation onchain");
