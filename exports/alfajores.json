@@ -3,7 +3,7 @@
   "chainId": "44787",
   "contracts": {
     "RFNFT": {
-      "address": "0xe9920dB7cC01d3F2b00C35DfED3B73fd96dA0974",
+      "address": "0x1D2540EFe05f5b53abABb7Be1780B370Bd3407aE",
       "abi": [
         {
           "inputs": [
@@ -315,6 +315,25 @@
               "internalType": "address",
               "name": "",
               "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "getOwnerPoints",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tier",
+              "type": "uint256"
             }
           ],
           "stateMutability": "view",
@@ -644,7 +663,7 @@
       ]
     },
     "RFP": {
-      "address": "0xD31f3A75ce8066d2409B64389483FaC33Ae2B77A",
+      "address": "0x1b5a1fDdd235d9a4c73F061318E017Bb52aCD444",
       "abi": [
         {
           "inputs": [],
@@ -1025,7 +1044,7 @@
       ]
     },
     "SimpleMinter": {
-      "address": "0x51a1555135416E9FA94185fC088a87222Ccb9278",
+      "address": "0xEc9EC0e51DBfA5aB969d91313C64f7eEF0348272",
       "abi": [
         {
           "inputs": [

@@ -71,11 +71,6 @@ describe("SimpleMinter", function () {
         .createAllocation([other2.address], [BigInt(amount)]);
     });
 
-    beforeEach("mint nft", async () => {
-      await rfnft.mint(other1.address);
-      await rfnft.mint(other2.address);
-    });
-
     context("without allocation", () => {
       it("reverts 'NoMinter()'", async function () {
         await expect(
@@ -85,21 +80,35 @@ describe("SimpleMinter", function () {
     });
 
     context("with allocation", () => {
-      it("emits a Transfer event", async function () {
-        await expect(simpleMinter.claim(other2.address)).to.emit(
-          rfp,
-          "Transfer"
-        );
+      context("without having an NFT", () => {
+        it("mints an NFT", async function () {
+          expect(await rfnft.balanceOf(other2.address)).to.equal(0);
+          await simpleMinter.claim(other2.address);
+          expect(await rfnft.balanceOf(other2.address)).to.equal(1);
+        });
       });
 
-      it("resets the allocation to zero'", async function () {
-        await simpleMinter.claim(other2.address);
-        expect(await simpleMinter.allocations(other2.address)).to.equal(0);
-      });
+      context("with having an NFT", () => {
+        beforeEach("mint nft", async () => {
+          await rfnft.mint(other2.address);
+        });
 
-      it("increases tha nft contract's balance'", async function () {
-        await simpleMinter.claim(other2.address);
-        expect(await rfp.balanceOf(rfnft.target)).to.equal(amount);
+        it("emits a Transfer event", async function () {
+          await expect(simpleMinter.claim(other2.address)).to.emit(
+            rfp,
+            "Transfer"
+          );
+        });
+
+        it("resets the allocation to zero'", async function () {
+          await simpleMinter.claim(other2.address);
+          expect(await simpleMinter.allocations(other2.address)).to.equal(0);
+        });
+
+        it("increases tha nft contract's balance'", async function () {
+          await simpleMinter.claim(other2.address);
+          expect(await rfp.balanceOf(rfnft.target)).to.equal(amount);
+        });
       });
     });
   });

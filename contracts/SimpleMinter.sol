@@ -29,6 +29,9 @@ contract SimpleMinter is Ownable {
         uint256 alloc = allocations[account];
         // check if account has allocation
         if(alloc == 0) revert InvalidZero();
+        if(_rfnft.balanceOf(account) == 0) {
+            _rfnft.mint(account);
+        }
         // mint tokens to this contract, approve nft contract and call feedToken
         _rfp.mint(address(this), alloc);
         _rfp.approve(address(_rfnft), alloc);
