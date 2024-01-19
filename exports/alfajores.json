@@ -3,7 +3,7 @@
   "chainId": "44787",
   "contracts": {
     "RFNFT": {
-      "address": "0xe206203c866645Dde108cD246b7c3f219E7C9eDa",
+      "address": "0x976c8244061CC363d1e72d0F1c0B4DBe9a78d483",
       "abi": [
         {
           "inputs": [
@@ -269,6 +269,30 @@
           ],
           "name": "balanceOf",
           "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "canLevelUp",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            },
             {
               "internalType": "uint256",
               "name": "",
@@ -694,7 +718,7 @@
       ]
     },
     "RFP": {
-      "address": "0xB973d6175582197aaBC5769f212b5965fF81AdBB",
+      "address": "0x8431584b4DEfaB5f4aDd6A4221161F2Cb6823DE9",
       "abi": [
         {
           "inputs": [],
@@ -1075,7 +1099,7 @@
       ]
     },
     "SimpleMinter": {
-      "address": "0xB44289b35A65aB400Cc8D8a2eb247ff5BD61B3C6",
+      "address": "0x236C4B59f22697aC22C8AC3A6442eBD6f2af9dbF",
       "abi": [
         {
           "inputs": [
