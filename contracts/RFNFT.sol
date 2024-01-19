@@ -6,15 +6,16 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract RFNFT is ERC721, Ownable {
 
     error OneTokenPerAddress();
+    error InsufficientPoints();
     error InvalidZero();
     error InvalidTier();
 
     event NewTier(uint256, string);
-    event PointsAdded(uint256 tokenId, uint256 points, uint256 newTier);
+    event LevelUp(uint256, uint256);
+    event PointsAdded(uint256 tokenId, uint256 points);
     event ThresholdsSet(uint256[] thresholds);
     event UrisSet(string[] uris);
 
@@ -52,14 +53,24 @@ contract RFNFT is ERC721, Ownable {
         if(tokenId == 0) revert InvalidZero(); 
         uint256 oldBalance = tokenIdPoints[tokenId];
         uint256 newBalance = oldBalance + amount;
-        uint256 newTier = _getTierQualification(newBalance);
 
-        tokenIdTier[tokenId] = newTier;
         tokenIdPoints[tokenId] = newBalance;
 
         _rfp.transferFrom(msg.sender, address(this), amount);
         
-        emit PointsAdded(tokenId, amount, newTier);
+        emit PointsAdded(tokenId, amount);
+    }
+
+    function levelUp(uint256 tokenId) public {
+        if(tokenId == 0) revert InvalidZero(); 
+        uint256 points = tokenIdPoints[tokenId];
+        uint256 currentTier = tokenIdTier[tokenId];
+        uint256 newTier = _getTierQualification(points);
+        if(currentTier == newTier) revert InsufficientPoints(); 
+
+        tokenIdTier[tokenId] = newTier;
+
+        emit LevelUp(tokenId, newTier);
     }
 
 
