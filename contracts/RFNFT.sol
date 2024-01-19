@@ -40,7 +40,7 @@ contract RFNFT is ERC721, Ownable {
         }
     }
 
-    function mint(address account) public {
+    function mint(address account) external {
         if(balanceOf(account) > 0) revert OneTokenPerAddress();
         _counter++;
         ownerTokenId[account] = _counter;
@@ -49,7 +49,7 @@ contract RFNFT is ERC721, Ownable {
     }
 
     /// @notice Adds points from `msg.sender` to NFT held by `account`
-    function feedToken(uint256 tokenId, uint256 amount) public {
+    function feedToken(uint256 tokenId, uint256 amount) external {
         if(tokenId == 0) revert InvalidZero(); 
         uint256 oldBalance = tokenIdPoints[tokenId];
         uint256 newBalance = oldBalance + amount;
@@ -61,7 +61,7 @@ contract RFNFT is ERC721, Ownable {
         emit PointsAdded(tokenId, amount);
     }
 
-    function levelUp(uint256 tokenId) public {
+    function levelUp(uint256 tokenId) external {
         if(tokenId == 0) revert InvalidZero(); 
         uint256 points = tokenIdPoints[tokenId];
         uint256 currentTier = tokenIdTier[tokenId];
