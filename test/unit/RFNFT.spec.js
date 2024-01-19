@@ -2,21 +2,19 @@ const { expect } = require("chai");
 const { ethers } = require("ethers");
 const { nftTiers } = require("../../config.js");
 
-const setupTest = deployments.createFixture(
-  async ({ deployments, getNamedAccounts, ethers }, options) => {
-    const [deployer, other1, other2] = await ethers.getSigners();
-    await deployments.fixture(["RFNFT", "RFP"]); // ensure you start from a fresh deployments
-    const rfnft = await ethers.getContract("RFNFT", deployer.address);
-    const rfp = await ethers.getContract("RFP", deployer.address);
-    return {
-      rfnft,
-      rfp,
-      accounts: { deployer, other1, other2 },
-    };
-  }
-);
+const setupTest = deployments.createFixture(async ({ deployments, ethers }) => {
+  const [deployer, other1, other2] = await ethers.getSigners();
+  await deployments.fixture(["RFNFT", "RFP"]); // ensure you start from a fresh deployments
+  const rfnft = await ethers.getContract("RFNFT", deployer.address);
+  const rfp = await ethers.getContract("RFP", deployer.address);
+  return {
+    rfnft,
+    rfp,
+    accounts: { deployer, other1, other2 },
+  };
+});
 
-describe.only("RFNFT", function () {
+describe("RFNFT", function () {
   let rfnft, rfp, deployer, other1, other2;
 
   beforeEach("Deploy", async () => {
