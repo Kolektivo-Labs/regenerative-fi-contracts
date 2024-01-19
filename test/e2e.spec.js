@@ -25,8 +25,7 @@ const setupTest = deployments.createFixture(
 );
 
 describe("Flow: Deploy > Alloc > Claim", function () {
-  let rfnft, rfp, simpleMinter, deployer, other1, other2;
-  let tx;
+  let rfnft, simpleMinter, tokenId;
 
   before("Deploy", async () => {
     ({
@@ -46,6 +45,7 @@ describe("Flow: Deploy > Alloc > Claim", function () {
   describe("minting an nft", () => {
     before("mint nft", async () => {
       await rfnft.mint(claimer);
+      tokenId = await rfnft.ownerTokenId(claimer);
     });
 
     it("increases users nft balance", async () => {
@@ -54,20 +54,23 @@ describe("Flow: Deploy > Alloc > Claim", function () {
   });
 
   describe("claiming points", () => {
-    const expectedTier = 2;
-
     before("claim points", async () => {
       await simpleMinter.claim(claimer);
     });
 
     it("increases points held by claimer's token", async () => {
-      const tokenId = await rfnft.ownerTokenId(claimer);
       expect(await rfnft.tokenIdPoints(tokenId)).to.equal(claimAmount);
+    });
+  });
+
+  describe("levelling up", () => {
+    const expectedTier = 2;
+
+    before("level up", async () => {
+      await rfnft.levelUp(tokenId);
     });
 
     it("evolves claimer's token", async () => {
-      const tokenId = await rfnft.ownerTokenId(claimer);
-
       expect(await rfnft.tokenIdTier(tokenId)).to.equal(expectedTier);
     });
   });
