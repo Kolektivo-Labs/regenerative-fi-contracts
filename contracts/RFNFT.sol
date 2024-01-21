@@ -6,15 +6,16 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract RFNFT is ERC721, Ownable {
 
     error OneTokenPerAddress();
+    error InsufficientPoints();
     error InvalidZero();
     error InvalidTier();
 
     event NewTier(uint256, string);
-    event PointsAdded(uint256 tokenId, uint256 points, uint256 newTier);
+    event LevelUp(uint256, uint256);
+    event PointsAdded(uint256 tokenId, uint256 points);
     event ThresholdsSet(uint256[] thresholds);
     event UrisSet(string[] uris);
 
@@ -39,7 +40,7 @@ contract RFNFT is ERC721, Ownable {
         }
     }
 
-    function mint(address account) public {
+    function mint(address account) external {
         if(balanceOf(account) > 0) revert OneTokenPerAddress();
         _counter++;
         ownerTokenId[account] = _counter;
@@ -48,18 +49,27 @@ contract RFNFT is ERC721, Ownable {
     }
 
     /// @notice Adds points from `msg.sender` to NFT held by `account`
-    function feedToken(uint256 tokenId, uint256 amount) public {
+    function feedToken(uint256 tokenId, uint256 amount) external {
         if(tokenId == 0) revert InvalidZero(); 
         uint256 oldBalance = tokenIdPoints[tokenId];
         uint256 newBalance = oldBalance + amount;
-        uint256 newTier = _getTierQualification(newBalance);
 
-        tokenIdTier[tokenId] = newTier;
         tokenIdPoints[tokenId] = newBalance;
 
         _rfp.transferFrom(msg.sender, address(this), amount);
         
-        emit PointsAdded(tokenId, amount, newTier);
+        emit PointsAdded(tokenId, amount);
+    }
+
+    function levelUp(uint256 tokenId) external {
+        uint256 newTier;
+        bool isLevelUp;
+        if(tokenId == 0) revert InvalidZero();
+        (isLevelUp, newTier) = canLevelUp(tokenId);
+        if(!isLevelUp) revert InsufficientPoints(); 
+
+        tokenIdTier[tokenId] = newTier;
+        emit LevelUp(tokenId, newTier);
     }
 
 
@@ -76,11 +86,18 @@ contract RFNFT is ERC721, Ownable {
 
     // GETTERS
 
-    function getOwnerTier(address account) public view returns (uint256 tier) {
+    function canLevelUp(uint256 tokenId) public view returns (bool, uint256) {
+        uint256 points = tokenIdPoints[tokenId];
+        uint256 currentTier = tokenIdTier[tokenId];
+        uint256 newTier = _getTierQualification(points);
+        return (newTier > currentTier, newTier);
+    }
+
+    function getOwnerTier(address account) external view returns (uint256 tier) {
         tier = tokenIdTier[ownerTokenId[account]];
     }
 
-    function getOwnerPoints(address account) public view returns (uint256 tier) {
+    function getOwnerPoints(address account) external view returns (uint256 tier) {
         tier = tokenIdPoints[ownerTokenId[account]];
     }
     

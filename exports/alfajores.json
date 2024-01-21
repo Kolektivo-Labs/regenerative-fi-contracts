@@ -3,7 +3,7 @@
   "chainId": "44787",
   "contracts": {
     "RFNFT": {
-      "address": "0x1D2540EFe05f5b53abABb7Be1780B370Bd3407aE",
+      "address": "0x976c8244061CC363d1e72d0F1c0B4DBe9a78d483",
       "abi": [
         {
           "inputs": [
@@ -25,6 +25,11 @@
           ],
           "stateMutability": "nonpayable",
           "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "InsufficientPoints",
+          "type": "error"
         },
         {
           "inputs": [],
@@ -102,6 +107,25 @@
             },
             {
               "indexed": false,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "LevelUp",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
               "internalType": "string",
               "name": "",
               "type": "string"
@@ -142,12 +166,6 @@
               "indexed": false,
               "internalType": "uint256",
               "name": "points",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "newTier",
               "type": "uint256"
             }
           ],
@@ -251,6 +269,30 @@
           ],
           "name": "balanceOf",
           "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "canLevelUp",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            },
             {
               "internalType": "uint256",
               "name": "",
@@ -380,6 +422,19 @@
             }
           ],
           "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "levelUp",
+          "outputs": [],
+          "stateMutability": "nonpayable",
           "type": "function"
         },
         {
@@ -663,7 +718,7 @@
       ]
     },
     "RFP": {
-      "address": "0x1b5a1fDdd235d9a4c73F061318E017Bb52aCD444",
+      "address": "0x8431584b4DEfaB5f4aDd6A4221161F2Cb6823DE9",
       "abi": [
         {
           "inputs": [],
@@ -1044,7 +1099,7 @@
       ]
     },
     "SimpleMinter": {
-      "address": "0xEc9EC0e51DBfA5aB969d91313C64f7eEF0348272",
+      "address": "0x236C4B59f22697aC22C8AC3A6442eBD6f2af9dbF",
       "abi": [
         {
           "inputs": [
