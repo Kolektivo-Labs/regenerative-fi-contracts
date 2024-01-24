@@ -5,6 +5,7 @@ require("hardhat-deploy-ethers");
 require("hardhat-local-networks-config-plugin");
 
 require("./tasks/createAlloc");
+require("./tasks/debug");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
