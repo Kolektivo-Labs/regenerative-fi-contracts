@@ -3,13 +3,16 @@ task(
   "Retrieves relevant information for a given account"
 )
   .addParam("account", "Account address")
-  .setAction(async ({ address }, { ethers }) => {
+  .setAction(async ({ account }, { ethers }) => {
     const rfnft = await ethers.getContract("RFNFT");
 
-    console.log("balanceOf: ", await rfnft.balanceOf(address));
-    const tokenId = await rfnft.ownerTokenId(address);
-    console.log("ownerTokenId: ", tokenId);
-    console.log("tokenIdTier: ", await rfnft.tokenIdTier(tokenId));
-    console.log("tokenIdPoints: ", await rfnft.tokenIdPoints(tokenId));
-    console.log("tokenURI: ", await rfnft.tokenURI(tokenId));
+    console.log(`balanceOf(${account}) = `, await rfnft.balanceOf(account));
+    const tokenId = await rfnft.ownerTokenId(account);
+    console.log(`ownerTokenId(${account}) = `, tokenId);
+    console.log(`tokenIdTier(${tokenId}) = `, await rfnft.tokenIdTier(tokenId));
+    console.log(
+      `tokenIdPoints(${tokenId}) = `,
+      await rfnft.tokenIdPoints(tokenId)
+    );
+    console.log(`tokenURI(${tokenId}) = `, await rfnft.tokenURI(tokenId));
   });
