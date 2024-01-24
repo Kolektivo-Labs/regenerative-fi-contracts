@@ -1,5 +1,5 @@
 task(
-  "task:get-address-info",
+  "task:get-account-info",
   "Retrieves relevant information for a given account"
 )
   .addParam("account", "Account address")
