@@ -1,4 +1,10 @@
-const { numsTo18Dec } = require("./tasks/utils.js");
+const { ethers } = require("ethers");
+
+function numsTo18Dec(nums) {
+  return nums.map((num) => ethers.parseEther(num.toString()));
+}
+
+// CONFIG:
 
 const subgraph = {
   optimism:
