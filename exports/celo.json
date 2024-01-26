@@ -3,7 +3,7 @@
   "chainId": "42220",
   "contracts": {
     "RFNFT": {
-      "address": "0xBA7d3fB1BBD73f4289C7FB42e8EC268EC9C32bE3",
+      "address": "0x342abeB491A776978b1EaA1ae6357f066416E9B9",
       "abi": [
         {
           "inputs": [
@@ -401,6 +401,19 @@
           "type": "function"
         },
         {
+          "inputs": [],
+          "name": "getTierThresholds",
+          "outputs": [
+            {
+              "internalType": "uint256[]",
+              "name": "tierThresholds",
+              "type": "uint256[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
           "inputs": [
             {
               "internalType": "address",
@@ -718,7 +731,7 @@
       ]
     },
     "RFP": {
-      "address": "0x74072b693f1Da8B74b24563Cbded727228c0A898",
+      "address": "0xB55C408d0e511A5b818590E48be26562f8C24bF0",
       "abi": [
         {
           "inputs": [],
@@ -1099,7 +1112,7 @@
       ]
     },
     "SimpleMinter": {
-      "address": "0xd437fa025E43ca4578aD682Bcfb1B003041d48D1",
+      "address": "0x605b4853B9DE704E24A81955B9476Fe10096bD23",
       "abi": [
         {
           "inputs": [
