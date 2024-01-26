@@ -106,6 +106,14 @@ contract RFNFT is ERC721, Ownable {
         uint256 tier = tokenIdTier[tokenId];
         return string(abi.encodePacked(_baseUri, _tierUris[tier - 1]));
     }
+    
+    function getTierThresholds() external view returns (uint256[] memory tierThresholds) {
+        tierThresholds = new uint256[](_tierThresholds.length);
+
+        for (uint256 i = 0; i < _tierThresholds.length; i++) {
+            tierThresholds[i] = _tierThresholds[i];
+        }
+    }
 
     // PRIVATE FUNCTIONS
 
