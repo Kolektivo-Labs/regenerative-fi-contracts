@@ -137,14 +137,17 @@ task(
 
   console.log("Storing allocation as JSON");
   const content = JSON.stringify(Object.entries(pointAllocations));
-  const contentPath = path.join(
-    __dirname,
-    `../data/${network.name}/${epochEnd}.json`
-  );
+  const networkPath = path.join(__dirname, `../data/${network.name}`);
+  try {
+    await fs.access(networkPath);
+  } catch (e) {
+    await fs.mkdir(networkPath);
+  }
+  const contentPath = `${networkPath}/${epochStart}-${epochEnd}.json`;
   await fs.writeFile(contentPath, content);
 
   console.log(
     "# stored allocation to: ",
-    `../data/${network.name}/${epochEnd}.json`
+    `../data/${network.name}/${epochStart}-${epochEnd}.json`
   );
 });

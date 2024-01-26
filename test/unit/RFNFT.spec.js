@@ -188,4 +188,10 @@ describe("RFNFT", function () {
       });
     });
   });
+
+  describe("#getTierThresholds", () => {
+    it("returns the tier thresholds", async () => {
+      expect(await rfnft.getTierThresholds()).to.eql(nftTiers.pointThresholds);
+    });
+  });
 });
