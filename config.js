@@ -5,6 +5,7 @@ const subgraph = {
     "https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2",
   alfajores:
     "https://api.studio.thegraph.com/query/10166/balancer-rfi/version/latest",
+  celo: "https://api.studio.thegraph.com/proxy/63886/refi-celo/version/latest",
 };
 const campaigns = {
   alphaWeeklySwapVolume: {
