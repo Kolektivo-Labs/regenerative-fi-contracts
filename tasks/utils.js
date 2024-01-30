@@ -1,7 +1,7 @@
 const { DateTime } = require("luxon");
 const { campaigns } = require("../config.js");
 
-function getEpoch() {
+function getEpoch(current = false) {
   const midnightConfig = {
     hour: 0,
     minute: 0,
@@ -13,16 +13,30 @@ function getEpoch() {
   const lastThursday = currentDate.minus({ days: daysUntilLastThursday });
   const lastThursdayMidnight = lastThursday.set(midnightConfig);
   const lastThursdayTimestamp = lastThursdayMidnight.toSeconds();
-  const secondToLastThursday = lastThursdayMidnight.minus({
-    days: 7,
-  });
-  const secondToLastThursdayMidnight = secondToLastThursday.set(midnightConfig);
-  const secondToLastThursdayTimestamp =
-    secondToLastThursdayMidnight.toSeconds();
-  return {
-    epochStart: secondToLastThursdayTimestamp,
-    epochEnd: lastThursdayTimestamp,
-  };
+
+  if (current) {
+    const nextThursday = lastThursdayMidnight.plus({
+      days: 7,
+    });
+    const nextThursdayMidnight = nextThursday.set(midnightConfig);
+    const nextThursdayTimestamp = nextThursdayMidnight.toSeconds();
+    return {
+      epochStart: lastThursdayTimestamp,
+      epochEnd: nextThursdayTimestamp,
+    };
+  } else {
+    const secondToLastThursday = lastThursdayMidnight.minus({
+      days: 7,
+    });
+    const secondToLastThursdayMidnight =
+      secondToLastThursday.set(midnightConfig);
+    const secondToLastThursdayTimestamp =
+      secondToLastThursdayMidnight.toSeconds();
+    return {
+      epochStart: secondToLastThursdayTimestamp,
+      epochEnd: lastThursdayTimestamp,
+    };
+  }
 }
 
 function getPointsAllocation(indicator, campaignName) {

@@ -48,23 +48,31 @@ task("task:create-alloc", "Push allocation onchain")
 task(
   "task:get-data",
   "Pulls swap data from subgraph and creates JSON file w/ alloc"
-).setAction(async (_, { ethers, network }) => {
-  const campaignName = "alphaWeeklySwapVolume";
-  console.log(
-    `\nTASK: retrieve subgraph data, compute and store points allocation for alpha campaign for network ${network.name}`
-  );
+)
+  .addOptionalParam(
+    "current",
+    "Flag if you want to get volume of ongoing epoch"
+  )
+  .setAction(async ({ current }, { ethers, network }) => {
+    const campaignName = "alphaWeeklySwapVolume";
+    console.log(
+      `\nTASK: retrieve subgraph data, compute and store points allocation for alpha campaign for network ${network.name}`
+    );
 
-  if (!subgraph[network.name])
-    throw Error(`No subgraph endpoint defined for ${network.name}`);
+    if (!subgraph[network.name])
+      throw Error(`No subgraph endpoint defined for ${network.name}`);
 
-  console.log(`Fetching swap data from subgraph ${subgraph[network.name]} ...`);
-  const { epochStart, epochEnd } = getEpoch();
+    console.log(
+      `Fetching swap data from subgraph ${subgraph[network.name]} ...`
+    );
+    const isOngoingEpoch = !!current;
+    const { epochStart, epochEnd } = getEpoch(isOngoingEpoch);
 
-  let data = [];
-  let timestamp = epochStart;
-  let lastId = "";
-  while (true) {
-    const query = `query WeeklySwaps {
+    let data = [];
+    let timestamp = epochStart;
+    let lastId = "";
+    while (true) {
+      const query = `query WeeklySwaps {
       swaps(where: {timestamp_gte: ${timestamp}, timestamp_lte: ${epochEnd}}, first: 1000, order_by: timestamp) {
         valueUSD
         timestamp
@@ -74,80 +82,78 @@ task(
         }
       }
     }`;
-    try {
-      const response = await axios.post(subgraph[network.name], {
-        query: query,
-      });
-      if (response.data.data) {
-        const { swaps } = response.data.data;
-        data = [...data, ...swaps];
-        const lastIdx = swaps.length - 1;
-        timestamp = swaps[lastIdx].timestamp;
-        if (lastId === swaps[lastIdx].id) break;
-        lastId = swaps[lastIdx].id;
-      } else {
-        console.log(response.data.errors);
+      try {
+        const response = await axios.post(subgraph[network.name], {
+          query: query,
+        });
+        if (response.data.data) {
+          const { swaps } = response.data.data;
+          data = [...data, ...swaps];
+          const lastIdx = swaps.length - 1;
+          timestamp = swaps[lastIdx].timestamp;
+          if (lastId === swaps[lastIdx].id) break;
+          lastId = swaps[lastIdx].id;
+        } else {
+          console.log(response.data.errors);
+        }
+      } catch (e) {
+        console.log(e);
       }
+    }
+    console.log("# swaps: ", data.length);
+
+    console.log("Processing data...");
+    const parsedData = data.map((d) => ({
+      valueUSD: parseInt(d.valueUSD),
+      userAddress: d.userAddress.id,
+    }));
+    const aggregatedSwapData = {};
+    parsedData.map(({ userAddress, valueUSD }) => {
+      if (!aggregatedSwapData[userAddress]) {
+        aggregatedSwapData[userAddress] = valueUSD;
+      } else {
+        aggregatedSwapData[userAddress] += valueUSD;
+      }
+    });
+    console.info(
+      "# unique swap addresses: ",
+      Object.keys(aggregatedSwapData).length
+    );
+    console.info(
+      "# total swap volume (USD): ",
+      Object.values(aggregatedSwapData).reduce((a, b) => a + b, 0)
+    );
+
+    console.log("Assigning points...");
+    const pointAllocations = {};
+    let totalPoints = 0;
+    for (const userAddress in aggregatedSwapData) {
+      const swapVolume = aggregatedSwapData[userAddress];
+      const allocation = getPointsAllocation(swapVolume, campaignName);
+      if (allocation > 0) {
+        totalPoints += parseInt(ethers.formatEther(allocation.toString()));
+        pointAllocations[userAddress] = allocation.toString();
+      }
+    }
+    console.info(
+      "# unique point recipients: ",
+      Object.keys(pointAllocations).length
+    );
+    console.info("# total points allocated: ", totalPoints);
+
+    console.log("Storing allocation as JSON");
+    const content = JSON.stringify(Object.entries(pointAllocations));
+    const networkPath = path.join(__dirname, `../data/${network.name}`);
+    try {
+      await fs.access(networkPath);
     } catch (e) {
-      console.log(e);
+      await fs.mkdir(networkPath);
     }
-  }
-  console.log("# swaps: ", data.length);
+    const contentPath = `${networkPath}/${epochStart}-${epochEnd}.json`;
+    await fs.writeFile(contentPath, content);
 
-  console.log("Processing data...");
-  const parsedData = data.map((d) => ({
-    valueUSD: parseInt(d.valueUSD),
-    userAddress: d.userAddress.id,
-  }));
-  const aggregatedSwapData = {};
-  parsedData.map(({ userAddress, valueUSD }) => {
-    if (!aggregatedSwapData[userAddress]) {
-      aggregatedSwapData[userAddress] = valueUSD;
-    } else {
-      aggregatedSwapData[userAddress] += valueUSD;
-    }
+    console.log(
+      "# stored allocation to: ",
+      `../data/${network.name}/${epochStart}-${epochEnd}.json`
+    );
   });
-  console.info(
-    "# unique swap addresses: ",
-    Object.keys(aggregatedSwapData).length
-  );
-  console.info(
-    "# total swap volume (USD): ",
-    Object.values(aggregatedSwapData).reduce((a, b) => a + b, 0)
-  );
-
-  console.log("Assigning points...");
-  const pointAllocations = {};
-  let totalPoints = 0;
-  for (const userAddress in aggregatedSwapData) {
-    const swapVolume = aggregatedSwapData[userAddress];
-    const allocation = getPointsAllocation(swapVolume, campaignName);
-    if (allocation > 0) {
-      totalPoints += allocation;
-      pointAllocations[userAddress] = ethers
-        .parseEther(allocation.toString())
-        .toString();
-    }
-  }
-  console.info(
-    "# unique point recipients: ",
-    Object.keys(pointAllocations).length
-  );
-  console.info("# total points allocated: ", totalPoints);
-
-  console.log("Storing allocation as JSON");
-  const content = JSON.stringify(Object.entries(pointAllocations));
-  const networkPath = path.join(__dirname, `../data/${network.name}`);
-  try {
-    await fs.access(networkPath);
-  } catch (e) {
-    await fs.mkdir(networkPath);
-  }
-  const contentPath = `${networkPath}/${epochStart}-${epochEnd}.json`;
-  await fs.writeFile(contentPath, content);
-
-  console.log(
-    "# stored allocation to: ",
-    `../data/${network.name}/${epochStart}-${epochEnd}.json`
-  );
-});
