@@ -1,6 +1,7 @@
 {
   "name": "hardhat-project",
   "devDependencies": {
+    "@balancer-labs/v2-interfaces": "^0.4.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "4.9.5",
