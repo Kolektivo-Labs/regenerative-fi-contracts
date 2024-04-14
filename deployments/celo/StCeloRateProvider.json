@@ -1,0 +1,88 @@
+{
+  "address": "0xeE193080D428DB7371ac3AB154aBba0D60fc0955",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IManager",
+          "name": "_stCeloManager",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "getRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "stCeloManager",
+      "outputs": [
+        {
+          "internalType": "contract IManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x6bb3ec4a2b806409a9c7d3d0a6903dd68bf48cec21f0749ee01c990bc65ec854",
+  "receipt": {
+    "to": null,
+    "from": "0xE87a58e66b7ecE7A5adcE276766eD2887E114052",
+    "contractAddress": "0xeE193080D428DB7371ac3AB154aBba0D60fc0955",
+    "transactionIndex": 15,
+    "gasUsed": "139817",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xb69672670a86f661e0f59ce6418675e0f2a0d0491e0fb153c315874e7a2cf8df",
+    "transactionHash": "0x6bb3ec4a2b806409a9c7d3d0a6903dd68bf48cec21f0749ee01c990bc65ec854",
+    "logs": [],
+    "blockNumber": 25018324,
+    "cumulativeGasUsed": "2181222",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x0239b96D10a434a56CC9E09383077A0490cF9398"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "9d96d9fa0d5230176a674e6068574a02",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.1+commit.f4a555be\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IManager\",\"name\":\"_stCeloManager\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"getRate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stCeloManager\",\"outputs\":[{\"internalType\":\"contract IManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getRate()\":{\"returns\":{\"_0\":\"the value of wstETH in terms of stETH\"}}},\"title\":\"Wrapped stCelo Rate Provider\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"Returns the value of stCelo in terms of Celo staked\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/rate-providers/StCeloRateProvider.sol\":\"StCeloRateProvider\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":9999},\"remappings\":[]},\"sources\":{\"@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-or-later\\n// This program is free software: you can redistribute it and/or modify\\n// it under the terms of the GNU General Public License as published by\\n// the Free Software Foundation, either version 3 of the License, or\\n// (at your option) any later version.\\n\\n// This program is distributed in the hope that it will be useful,\\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\\n// GNU General Public License for more details.\\n\\n// You should have received a copy of the GNU General Public License\\n// along with this program.  If not, see <http://www.gnu.org/licenses/>.\\n\\npragma solidity >=0.7.0 <0.9.0;\\n\\ninterface IRateProvider {\\n    /**\\n     * @dev Returns an 18 decimal fixed point number that is the exchange rate of the token to some other underlying\\n     * token. The meaning of this rate depends on the context.\\n     */\\n    function getRate() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x3c92c2d8d66ea652f3de955704c591865b412dbd43fb3c5e8ca30efab4a73623\",\"license\":\"GPL-3.0-or-later\"},\"contracts/interfaces/stCelo/IManager.sol\":{\"content\":\"//SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity 0.7.1;\\n\\ninterface IManager {\\n    function updateHistoryAndReturnLockedStCeloInVoting(address beneficiary)\\n        external\\n        returns (uint256);\\n\\n    function transfer(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) external;\\n\\n    function scheduleTransferWithinStrategy(\\n        address[] calldata fromGroups,\\n        address[] calldata toGroups,\\n        uint256[] calldata fromVotes,\\n        uint256[] calldata toVotes\\n    ) external;\\n\\n    function toCelo(uint256 stCeloAmount) external view returns (uint256);\\n\\n    function toStakedCelo(uint256 celoAmount) external view returns (uint256);\\n\\n    function getReceivableVotesForGroup(address group) external view returns (uint256);\\n}\",\"keccak256\":\"0xc8036230eef3bde0335075859f0550bea0f36e6c00f9a9db4d368fe9bdb9f8ab\",\"license\":\"LGPL-3.0-only\"},\"contracts/rate-providers/StCeloRateProvider.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-or-later\\n// This program is free software: you can redistribute it and/or modify\\n// it under the terms of the GNU General Public License as published by\\n// the Free Software Foundation, either version 3 of the License, or\\n// (at your option) any later version.\\n\\n// This program is distributed in the hope that it will be useful,\\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\\n// GNU General Public License for more details.\\n\\n// You should have received a copy of the GNU General Public License\\n// along with this program.  If not, see <http://www.gnu.org/licenses/>.\\n\\npragma solidity 0.7.1;\\n\\nimport \\\"@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol\\\";\\nimport \\\"../interfaces/stCelo/IManager.sol\\\";\\n\\n/**\\n * @title Wrapped stCelo Rate Provider\\n * @notice Returns the value of stCelo in terms of Celo staked\\n */\\ncontract StCeloRateProvider is IRateProvider {\\n    IManager public immutable stCeloManager;\\n\\n    constructor(IManager _stCeloManager) {\\n        stCeloManager = _stCeloManager;\\n    }\\n\\n    /**\\n     * @return the value of wstETH in terms of stETH\\n     */\\n    function getRate() external view override returns (uint256) {\\n        return stCeloManager.toCelo(1 ether);\\n    }\\n}\",\"keccak256\":\"0x9a93b936af6de949e69b99388a3da8f6d837c0de63d3984c902dcf62fbbca91c\",\"license\":\"GPL-3.0-or-later\"}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b506040516101f73803806101f78339818101604052602081101561003357600080fd5b5051606081901b6001600160601b0319166080526001600160a01b031661018c61006b60003980608a5280610134525061018c6000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c8063679aefce1461003b5780639d738b9b14610055575b600080fd5b610043610086565b60408051918252519081900360200190f35b61005d610132565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16630567847f670de0b6b3a76400006040518263ffffffff1660e01b81526004018082815260200191505060206040518083038186803b15801561010157600080fd5b505afa158015610115573d6000803e3d6000fd5b505050506040513d602081101561012b57600080fd5b5051905090565b7f00000000000000000000000000000000000000000000000000000000000000008156fea2646970667358221220c895e35931da7775faf70e1bac9f455fd0a514626661a9d26b2827758ff12ba864736f6c63430007010033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c8063679aefce1461003b5780639d738b9b14610055575b600080fd5b610043610086565b60408051918252519081900360200190f35b61005d610132565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16630567847f670de0b6b3a76400006040518263ffffffff1660e01b81526004018082815260200191505060206040518083038186803b15801561010157600080fd5b505afa158015610115573d6000803e3d6000fd5b505050506040513d602081101561012b57600080fd5b5051905090565b7f00000000000000000000000000000000000000000000000000000000000000008156fea2646970667358221220c895e35931da7775faf70e1bac9f455fd0a514626661a9d26b2827758ff12ba864736f6c63430007010033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "getRate()": {
+        "returns": {
+          "_0": "the value of wstETH in terms of stETH"
+        }
+      }
+    },
+    "title": "Wrapped stCelo Rate Provider",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "Returns the value of stCelo in terms of Celo staked",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

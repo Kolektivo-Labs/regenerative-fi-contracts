@@ -44,7 +44,10 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: { alfajores: process.env.ALFAJORES_API_KEY },
+    apiKey: {
+      alfajores: process.env.ALFAJORES_API_KEY,
+      celo: process.env.CELO_API_KEY,
+    },
     customChains: [
       {
         network: "zkemv",

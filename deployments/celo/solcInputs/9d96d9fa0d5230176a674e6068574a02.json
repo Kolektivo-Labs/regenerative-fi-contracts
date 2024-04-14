@@ -1,0 +1,41 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0-or-later\n// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU General Public License for more details.\n\n// You should have received a copy of the GNU General Public License\n// along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\npragma solidity >=0.7.0 <0.9.0;\n\ninterface IRateProvider {\n    /**\n     * @dev Returns an 18 decimal fixed point number that is the exchange rate of the token to some other underlying\n     * token. The meaning of this rate depends on the context.\n     */\n    function getRate() external view returns (uint256);\n}\n"
+    },
+    "contracts/interfaces/stCelo/IManager.sol": {
+      "content": "//SPDX-License-Identifier: LGPL-3.0-only\npragma solidity 0.7.1;\n\ninterface IManager {\n    function updateHistoryAndReturnLockedStCeloInVoting(address beneficiary)\n        external\n        returns (uint256);\n\n    function transfer(\n        address from,\n        address to,\n        uint256 amount\n    ) external;\n\n    function scheduleTransferWithinStrategy(\n        address[] calldata fromGroups,\n        address[] calldata toGroups,\n        uint256[] calldata fromVotes,\n        uint256[] calldata toVotes\n    ) external;\n\n    function toCelo(uint256 stCeloAmount) external view returns (uint256);\n\n    function toStakedCelo(uint256 celoAmount) external view returns (uint256);\n\n    function getReceivableVotesForGroup(address group) external view returns (uint256);\n}"
+    },
+    "contracts/rate-providers/StCeloRateProvider.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0-or-later\n// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU General Public License for more details.\n\n// You should have received a copy of the GNU General Public License\n// along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\npragma solidity 0.7.1;\n\nimport \"@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol\";\nimport \"../interfaces/stCelo/IManager.sol\";\n\n/**\n * @title Wrapped stCelo Rate Provider\n * @notice Returns the value of stCelo in terms of Celo staked\n */\ncontract StCeloRateProvider is IRateProvider {\n    IManager public immutable stCeloManager;\n\n    constructor(IManager _stCeloManager) {\n        stCeloManager = _stCeloManager;\n    }\n\n    /**\n     * @return the value of wstETH in terms of stETH\n     */\n    function getRate() external view override returns (uint256) {\n        return stCeloManager.toCelo(1 ether);\n    }\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 9999
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
