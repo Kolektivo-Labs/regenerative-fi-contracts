@@ -65,6 +65,10 @@ Run this task by executing the following command in the console:
 
 It will parse the allocation JSON file and call the `createAllocation` function on the SimpleMinter with the allocation data. To consider gas limits, if there are more than 400 eligible addresses, the task will batch the transactions (max 400 addresses per tx).
 
+### Rate providers
+
+#### `StCeloRateProvider`
+StCeloRateProvider serves as a rate provider for a StablePool containing stCelo and Celo.
 
 ## Deploying contracts
 
