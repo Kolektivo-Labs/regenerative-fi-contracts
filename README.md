@@ -16,7 +16,7 @@ Run tests: `npx hardhat test`
 ## Overview
 
 ### Points and NFTs: Contracts
-My First Board - Frame 1 (1)
+![My First Board - Frame 1 (1)](https://github.com/Kolektivo-Labs/regenerative-fi-contracts/assets/48454910/aa5a681c-cb3d-414b-a390-4ecdfc162162)
 
 There are three contracts responsible to represent the points and NFT logic:
 
@@ -30,13 +30,18 @@ End users will only interact with the contract through two functions:
 There are a two permissioned functions to be operated by the protocol admin:
 * `addTier` allows to add another tier with point threshold and metadata url to the contract
 * `editTier` allows to edit the threshold and metadata url of a given tier
+
 Note: if a user has already leveled up their token and the threshold is increased, the user will still keep their tier (= it is impossible to downgrade existing tokens)
 
+#### RFP
+RFNFT is a plain ERC20 contract. It contains two permissioned functions (`enableMinter`, `disableMinter`) to be operated by the admin that allow to add and remove an address with minting capabilities. Beyond that it only contains a `mint` function which can only be called by an address that has been registered as minter. 
 
-#### RNFT
-RFNFT is an ERC721 contract.
+#### SimpleMinter
+SimpleMinter is a super plain minter contract. It just keeps track of addresses and how much they are allowed to mint (via a simple mapping). A given address can call the `claim` function, the contract checks if the caller has points to claim and if so mints them to the NFT contract which associates it with the token held by the caller. If the user doesn't have an NFT yet, the `claim` function will mint one to them.
 
-#### Points and NFTs
+On the other side, the protocol admin can add new points allocations by calling the `createAllocation` function. For a given user, any new allocations will be added to their existing ones.
+
+#### Points and NFTs: Scripts
 
 
 ## Deploying contracts
