@@ -6,6 +6,7 @@ require("hardhat-local-networks-config-plugin");
 
 require("./tasks/createAlloc");
 require("./tasks/debug");
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -90,5 +91,12 @@ module.exports = {
         },
       },
     ],
+  },
+  networks: {
+    celo: {
+      url: "https://forno.celo.org", 
+      accounts: [process.env.PRIVATE_KEY], 
+      chainId: 42220, 
+    },
   },
 };
